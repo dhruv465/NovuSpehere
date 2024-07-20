@@ -1,12 +1,12 @@
-// Home.js
+// src/pages/Home.js
+import axios from 'axios';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { logout, setOnlineUser, setUser } from '../redux/userSlice';
 import Sidebar from '../Mycomponents/Sidebar';
 import logo from '../assets/logo.png';
-import axios from 'axios';
-import { initSocketConnection, getSocket } from '../socket/socket';
+import { initSocketConnection } from '../socket'; // Ensure the correct path to socket.js
 
 const Home = () => {
   const user = useSelector(state => state.user);
@@ -40,6 +40,8 @@ const Home = () => {
 
   useEffect(() => {
     const socket = initSocketConnection(localStorage.getItem('token'));
+    console.log('Socket initialized:', socket); // Add this line to debug
+
 
     socket.on('onlineUser', (data) => {
       console.log(data);
