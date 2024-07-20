@@ -5,7 +5,9 @@ const initialState = {
   email: "",
   profile_pic: "",
   token: "",
-  onlineUser: []
+  onlineUser: [],
+  socketConnection : null
+
 }
 
 const userSlice = createSlice({
@@ -27,13 +29,19 @@ const userSlice = createSlice({
       state.email = ""
       state.profile_pic = ""
       state.token = ""
+      state.socketConnection = null
     },
     setOnlineUser: (state, action) => {
-      state.onlineUser = action.payload;
+      state.onlineUser = action.payload
+
+    },
+    setSocketConnection : (state,action)=> {
+      state.socketConnection = action.payload
     }
   },
-});
+})
 
-export const { setUser, setToken, logout, setOnlineUser } = userSlice.actions;
+// Action creators are generated for each case reducer function
+export const { setUser, setToken, logout, setOnlineUser, setSocketConnection } = userSlice.actions
 
-export default userSlice.reducer;
+export default userSlice.reducer
