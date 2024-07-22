@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react';
 import { IoCloseOutline } from "react-icons/io5";
 import Avatar from './Avatar';
 import uploadFile from '../helpers/uploadFile';
@@ -7,87 +7,84 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../redux/userSlice';
-
+import { stringify } from 'flatted';
 
 const EditUserDetails = ({ onClose, user }) => {
-
-
     const [data, setData] = useState({
+        name: user?.name || '',
+        profile_pic: user?.profile_pic || '',
+    });
 
-        name: user?.user,
-        profile_pic: user?.profile_pic,
-
-    })
-    const uploadPhotoRef = useRef()
-    const dispatch = useDispatch()
+    const uploadPhotoRef = useRef();
+    const dispatch = useDispatch();
 
     useEffect(() => {
-        setData((preve) => {
-            return {
-                ...preve,
-                ...user
-            }
-        })
-    }, [user])
-
+        setData((prev) => ({
+            ...prev,
+            ...user
+        }));
+    }, [user]);
 
     const handleOnChange = (e) => {
-        const { name, value } = e.target
+        const { name, value } = e.target;
+        setData((prev) => ({
+            ...prev,
+            [name]: value
+        }));
+    };
 
-
-        setData((prev) => {
-            return {
-                ...prev,
-                [name]: value
-            }
-        })
-    }
     const handleOpenUploadPhoto = (e) => {
-        e.preventDefault()
-        e.stopPropagation()
+        e.preventDefault();
+        e.stopPropagation();
+        uploadPhotoRef.current.click();
+    };
 
-        uploadPhotoRef.current.click()
-    }
     const handleUploadPhoto = async (e) => {
-        const file = e.target.files[0]
-
-        const uploadPhoto = await uploadFile(file)
-
-
-        setData((preve) => {
-            return {
-                ...preve,
-                profile_pic: uploadPhoto?.url
-            }
-        })
-    }
-
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-        e.stopPropagation()
+        const file = e.target.files[0];
+        if (!file) return;
         try {
-            const URL = `${process.env.REACT_APP_BACKEND_URL}/api/update-user`
-            const response = await axios({
-                method: 'post',
-                url: URL,
-                data: data,
-                withCredentials: true
-            })
-
-            toast.success(response?.data?.message)
-
-            if (response.data.success) {
-                dispatch(setUser(response.data.data))
-                onClose()
-            }
+            const uploadPhoto = await uploadFile(file);
+            setData((prev) => ({
+                ...prev,
+                profile_pic: uploadPhoto?.url || prev.profile_pic
+            }));
+        } catch (error) {
+            toast.error('Failed to upload photo.');
         }
+    };
 
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+        const URL = `${process.env.REACT_APP_BACKEND_URL}/api/update-user`;
 
-        catch (error) {
-            toast.error(error?.response?.data?.message)
+        // Log data to inspect its structure
+        console.log('Data being sent:', data);
+
+        // Use flatted.stringify if necessary
+        const serializedData = stringify(data);
+
+        // Post the data with Axios
+        const response = await axios.post(URL, serializedData, {
+            withCredentials: true,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (response.data.success) {
+            dispatch(setUser(response.data.data));
+            toast.success(response.data.message);
+            onClose();
+        } else {
+            toast.error(response.data.message);
         }
+    } catch (error) {
+        console.error('Error:', error);
+        toast.error(error?.response?.data?.message || 'Failed to update user details.');
     }
-
+};
 
 
 
@@ -96,16 +93,11 @@ const EditUserDetails = ({ onClose, user }) => {
             <div className='w-full max-w-sm bg-white rounded-lg p-5'>
                 <div className='flex justify-between items-center'>
                     <h1 className='text-xl font-bold'>Edit User Details</h1>
-                    <button onClick={onClose}><IoCloseOutline size={25} />
-                    </button>
+                    <button onClick={onClose}><IoCloseOutline size={25} /></button>
                 </div>
                 <form className='grid gap-3 mt-3' onSubmit={handleSubmit}>
-                    {/*  use this for photo in future----->>>>w-16 rounded-full h-16 mt-2 flex justify-center items-center border hover:border-primary cursor-pointer */}
                     <div className='mt-4 flex justify-center items-center'>
-
-
-
-                        <div className='my-1 flex items-center gap-4' >
+                        <div className='my-1 flex items-center gap-4'>
                             <Avatar
                                 width={45}
                                 height={45}
@@ -127,7 +119,7 @@ const EditUserDetails = ({ onClose, user }) => {
                     </div>
                     <div className='mt-4'>
                         <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor='name'>
-                            Name :
+                            Name:
                         </label>
                         <input
                             type='text'
@@ -136,24 +128,17 @@ const EditUserDetails = ({ onClose, user }) => {
                             value={data.name}
                             onChange={handleOnChange}
                             className='shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
-
                         />
                     </div>
-
                     <Divider />
                     <div className='flex justify-end mt-4'>
-
                         <button className='bg-danger text-white px-4 py-2 rounded-md mr-2' onClick={onClose}>Cancel</button>
-                        <button className='bg-primary text-white px-4 py-2 rounded-md' type='
-                        submit' onClick={handleSubmit}>Update</button>
-
+                        <button className='bg-primary text-white px-4 py-2 rounded-md' type='submit'>Update</button>
                     </div>
-
-
                 </form>
-            </div >
-        </div >
-    )
-}
+            </div>
+        </div>
+    );
+};
 
-export default React.memo(EditUserDetails)
+export default React.memo(EditUserDetails);

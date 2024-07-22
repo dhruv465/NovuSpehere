@@ -1,26 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react'
+import moment from 'moment'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { HiOutlineDotsVertical } from 'react-icons/hi'
+import { IoAddOutline, IoChevronBack, IoCloseOutline, IoDocumentText, IoImages, IoSend, IoVideocam } from 'react-icons/io5'
 import { useSelector } from 'react-redux'
 import { Link, useParams } from 'react-router-dom'
-import Avatar from './Avatar'
-import { IoCall, IoChevronBack, IoCloseOutline, IoDocumentText, IoSend, IoVideocam } from 'react-icons/io5'
-import { HiOutlineDotsVertical } from "react-icons/hi";
-import { IoAddOutline } from "react-icons/io5";
-import { IoImages } from "react-icons/io5";
-import Loading from './Loader';
 import uploadFile from '../helpers/uploadFile'
-import bgimage from '../assets/wallpaper.png'
-import moment from 'moment'
-import { FcVideoCall } from "react-icons/fc";
-import { PiPhoneCallFill } from "react-icons/pi";
-
-
-
-
+import Avatar from './Avatar'
+import Loading from './Loader'
 
 
 const MessagePage = () => {
   const params = useParams()
   const socketConnection = useSelector(state => state?.user?.socketConnection)
+  const [modalImage, setModalImage] = useState(null);
+  const [activeMenu, setActiveMenu] = useState(null);
 
   const user = useSelector(state => state?.user)
   const [dataUser, setDataUser] = useState({
@@ -37,6 +30,7 @@ const MessagePage = () => {
     documentUrl: "",
     videoUrl: "",
     documentName: ""
+
   });
 
   const [loading, setLoading] = useState(false)
@@ -48,6 +42,22 @@ const MessagePage = () => {
       currentMessage.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
     }
   }, [allMessage])
+
+  const handleDownload = useCallback((imageUrl, fileName) => {
+    fetch(imageUrl)
+      .then(response => response.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName || 'download.jpg'; // Default filename if none provided
+        document.body.appendChild(link);
+        link.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(link);
+      })
+      .catch(error => console.error('Error downloading image:', error));
+  }, []);
 
 
   const handleUploadImageVideoOpen = () => {
@@ -135,26 +145,31 @@ const MessagePage = () => {
 
   useEffect(() => {
     if (socketConnection) {
-      socketConnection.emit('message-page', params.userId)
-
-      socketConnection.emit('seen', params.userId)
+      socketConnection.emit('message-page', params.userId);
+      socketConnection.emit('seen', params.userId);
 
       socketConnection.on('message-user', (data) => {
-        setDataUser(data)
-      })
+        setDataUser(data);
+      });
 
       socketConnection.on('message', (data) => {
-        console.log('message data', data)
-        setAllMessage(data)
-      })
+        setAllMessage(data);
+      });
 
-
+      socketConnection.on('seen', (data) => {
+        // Update the seen status of messages
+        setAllMessage(prevMessages =>
+          prevMessages.map(msg =>
+            msg.sender === data.userId ? { ...msg, seen: true } : msg
+          )
+        );
+      });
     }
-  }, [socketConnection, params?.userId, user])
+  }, [socketConnection, params?.userId, user]);
 
 
   const handleOnChange = (e) => {
-    const { name, value } = e.target
+    const { value } = e.target
 
     setMessage(preve => {
       return {
@@ -167,7 +182,7 @@ const MessagePage = () => {
   const handleSendMessage = (e) => {
     e.preventDefault();
 
-    if (message.text || message.imageUrl || message.videoUrl || message.documentUrl) {
+    if (message.text || message.imageUrl || message.videoUrl || message.documentUrl || message.documentName || message.documentType) {
       if (socketConnection) {
         socketConnection.emit('new message', {
           sender: user?._id,
@@ -177,6 +192,7 @@ const MessagePage = () => {
           videoUrl: message.videoUrl,
           documentUrl: message.documentUrl,
           documentName: message.documentName,
+          documentType: message.documentType,
           msgByUserId: user?._id
         });
         setMessage({
@@ -184,7 +200,8 @@ const MessagePage = () => {
           imageUrl: "",
           videoUrl: "",
           documentUrl: "",
-          documentName: ""
+          documentName: "",
+          documentType: "",
         });
       }
     }
@@ -192,9 +209,9 @@ const MessagePage = () => {
 
 
   return (
-    <div style={{ backgroundImage: `url(${bgimage})` }} className='bg-no-repeat bg-cover z-10'>
-      <header className='sticky top-0 h-16 bg-slate-100 shadow-md flex justify-between items-center px-4'>
-        <div className='flex items-center gap-2'>
+    <div className=''>
+      <header className='sticky top-0 h-16  bg-header border-b	backdrop-filter backdrop-blur-lg  shadow-md flex justify-between items-center px-4'>
+        <div className='flex  items-center gap-2'>
           <Link to={"/"} className='rounded-full lg:hidden'>
 
             <IoChevronBack
@@ -219,36 +236,16 @@ const MessagePage = () => {
             </h3>
             <p className='-my-2 text-sm'>
               {
-                dataUser.online ? <span className='text-purple-500'>online</span> : <span className='text-slate-400'>offline</span>
+                dataUser.online ? <span className='text-primary'>online</span> : <span className='text-slate-400'>offline</span>
               }
             </p>
           </div>
         </div>
-        <div className='flex items-center gap-3'>
-          <button className='bg-slate-200 p-2 rounded-full hover:bg-slate-300' data-tooltip-target="tooltip-default">
-            <PiPhoneCallFill
-              size={25}
-            />
-          </button>
-          <div id="tooltip-default" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-            Tooltip content
-            <div class="tooltip-arrow" data-popper-arrow></div>
-          </div>
-          <button className='bg-slate-200 p-2 rounded-full hover:bg-slate-300' title='This feature is current unavailable'>
-            <FcVideoCall
-              size={25}
-            />
-          </button>
-          <button className='bg-slate-200 p-2 rounded-full hover:bg-slate-300' title='Go back'>
-            <HiOutlineDotsVertical
-              size={25}
-            />
-          </button>
-        </div>
+
       </header>
 
       {/* Message container */}
-      <section className='h-[calc(100vh-128px)] overflow-x-hidden overflow-y-scroll scrollbar relative  bg-white bg-opacity-40' >
+      <section className='h-[calc(100vh-128px)] overflow-x-hidden bg-white overflow-y-scroll scrollbar relative ' >
 
 
 
@@ -308,15 +305,25 @@ const MessagePage = () => {
                   </button>
                 </div>
                 <div className='flex justify-center items-center '>
-                  <a href={message.documentUrl} target='_blank' rel='noreferrer'>
-                    <IoDocumentText size={50} />
-                    <span className='ml-2'>{message.documentName}</span>
-                  </a>
+                  {/* Check if thumbnailUrl is available, if yes, show the thumbnail, else show the document icon */}
+                  {message.thumbnailUrl ? (
+                    <a href={message.documentUrl} target='_blank' rel='noreferrer'>
+                      <img src={message.thumbnailUrl} alt="Document Preview" style={{ maxWidth: '100%', maxHeight: '400px' }} />
+                      <span className='ml-2'>{message.documentName}</span> {/* Displaying the document name */}
+                    </a>
+                  ) : (
+                    <a href={message.documentUrl} target='_blank' rel='noreferrer'>
+                      <IoDocumentText size={50} />
+                      <span className='ml-2'>{message.documentName}</span> {/* Displaying the document name */}
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
           )
         }
+
+
 
         {
           loading && (
@@ -338,77 +345,133 @@ const MessagePage = () => {
         {/* Message container */}
 
         <div className='w-full max-w-screen-xl mx-auto p-4' ref={currentMessage}>
-          {/*<div className='flex flex-col justify-center items-center'>
-          <div className='flex justify-center items-center gap-2'>
-            <div className='w-1/2 h-1 bg-slate-400'></div>
-            <p className='text-slate-400'>Today</p>
-            <div className='w-1/2 h-1 bg-slate-400'></div>
-          </div>   key={index}
-        </div>  */}
-          {
-            allMessage.length === 0 && (
-              <p className='text-center bg-purple-100 rounded-md shadow-md text-black '>
-                No messages here yet!!
-              </p>
-            )
-          }
-          {
-            allMessage.length > 0 && (
-              allMessage.map((msg, index) => {
-                return (
-                  <div key={index} className={`flex max-w[280px] gap-2 ${msg?.msgByUserId === user?._id ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`flex gap-2 py-2 items-center ${msg?.msgByUserId === user?._id ? 'flex-row-reverse' : 'flex-row'}`}>
-                      <div className='m-2'>
-                        <Avatar
-                          width={40}
-                          height={40}
-                          imageUrl={msg?.msgByUserId === user?._id ? user?.profile_pic : dataUser?.profile_pic}
-                          name={msg?.msgByUserId === user?._id ? user?.name : dataUser?.name}
-                          userId={msg?.msgByUserId === user?._id ? user?._id : dataUser?._id}
-                        />
-                      </div>
-                      <div className={` shadow-2xl drop-shadow-2xl transition-shadow p-2 mt-2 lg:max-w-xl md:max-w-sm rounded-lg ${user._id === msg.msgByUserId ? "ml-auto bg-purple-200" : "bg-white"}`}>
-                        <p className='text-sm'>
-                          {msg.text}
-                        </p>
-                        <p className='text-xs ml-auto w-fit'>
-                          {moment(msg.createdAt).format('hh:mm')}
-                        </p>
-                        {
-                          msg.imageUrl && (
-                            <img src={msg.imageUrl} alt='messageimage' className='w-full h-40 object-cover rounded-lg' />
-                          )
-                        }
-                        {
-                          msg.videoUrl && (
-                            <video src={msg.videoUrl} className='w-full h-40 object-cover rounded-lg' controls />
-                          )
-                        }
-                        {
-                          msg.documentUrl && (
-                            <a href={msg.documentUrl} target='_blank' rel='noreferrer'>
-                              <IoDocumentText
-                                size={25}
-                              />
 
+          {allMessage.length === 0 && (
+            <div className="flex flex-col items-center justify-center h-full text-gray-500">
+              <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              <p className="text-xl font-semibold mb-2">No messages yet</p>
+              <p className="text-sm text-center max-w-xs">
+                Start a conversation! Send a message to begin chatting.
+              </p>
+            </div>
+          )}
+          {allMessage.length > 0 && (
+            allMessage.map((msg, index) => {
+              return (
+                <div key={index} className={`flex flex-col max-w[280px] ${msg?.msgByUserId === user?._id ? 'items-end' : 'items-start'} gap-2`}>
+                  <div className={`flex gap-2 py-2 ${msg?.msgByUserId === user?._id ? 'flex-row-reverse' : 'flex-row'}`}>
+                    {/* <Avatar
+                        width={40}
+                        height={40}
+                        imageUrl={msg?.msgByUserId === user?._id ? user?.profile_pic : dataUser?.profile_pic}
+                        name={msg?.msgByUserId === user?._id ? user?.name : dataUser?.name}
+                        userId={msg?.msgByUserId === user?._id ? user?._id : dataUser?._id}
+                      /> */}
+                    <div className={`transition-shadow mt-2 lg:max-w-xl flex-shrink-0 md:max-w-sm ${user._id === msg.msgByUserId ? "ml-auto" : ""}`}>
+                      {msg.text && (
+                        <div className={`p-3 rounded-3xl ${user._id === msg.msgByUserId ? "bg-primary text-white" : "bg-tertiary"}`}>
+                          <p className='text-sm'>{msg.text}</p>
+                        </div>
+                      )}
+                      {msg.imageUrl && (
+                        <div className="relative group">
+                          <img
+                            src={msg.imageUrl}
+                            alt='messageimage'
+
+                            className='w-full max-h-40 sm:max-h-60 md:max-h-80 lg:max-h-40 object-contain rounded-lg cursor-pointer'
+                            onClick={() => setModalImage(msg.imageUrl)}
+                          />
+                          <button
+                            className="absolute top-2 right-2 p-1 bg-black bg-opacity-50 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveMenu(activeMenu === msg._id ? null : msg._id);
+                            }}
+                          >
+                            <HiOutlineDotsVertical size={20} />
+                          </button>
+                          {activeMenu === msg._id && (
+                            <div className="absolute top-10 right-2 backdrop-filter backdrop-blur-lg bg-white shadow-lg rounded-md py-2 z-10">
+                              <a
+                                href={msg.imageUrl}
+                                download
+                                className="block px-4 py-2 hover:bg-secondary text-sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDownload(msg.imageUrl, `image_${msg._id}.jpg`);
+                                  setActiveMenu(null);
+                                }}
+                              >
+                                Download
+                              </a>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setModalImage(msg.imageUrl);
+                                  setActiveMenu(null);
+                                }}
+                                className="block w-full text-left px-4 py-2 hover:bg-secondary text-sm"
+                              >
+                                View
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {msg.videoUrl && (
+                        <video src={msg.videoUrl} className='w-full max-h-40 object-contain rounded-lg' controls />
+                      )}
+                      {msg.documentUrl && (
+                        <div className='document-preview flex cursor-pointer bg-secondary p-4 rounded-xl'>
+                          <div className='drop-shadow-xl'>
+                            {msg.thumbnailUrl ? (
+                              <img src={msg.thumbnailUrl} alt="Document Preview" style={{ width: '100px', height: 'auto' }} />
+                            ) : (
+                              <IoDocumentText size={55} />
+                            )}
+                          </div>
+                          <div className='leading-tight p-2 text-black w-56'>
+                            <a href={msg.documentUrl} target='_blank' rel='noreferrer'>
+                              <span className='ml-2 text-sm '>{msg.documentName}</span>
+                              <span className='ml-2 text-sm'>{msg.documentType}</span>
                             </a>
-                          )
-                        }
-                      </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
+
                   </div>
-                )
-              })
-            )
-          }
+
+                  {/* Status and Time Container */}
+                  <div className='text-xs flex space-x-2'>
+                    <div>
+                      {msg.seen ? (
+                        <span className="text-gray-500 font-medium">Seen</span>
+                      ) : (
+                        <span className='text-gray-600 font-medium'>Delivered</span>
+                      )}
+                    </div>
+                    <p>{moment(msg.createdAt).format('hh:mm')}</p>
+                  </div>
+                </div>
+
+
+
+              )
+            })
+          )}
+
 
         </div>
 
       </section>
 
-      <section className='fixed bottom-0 w-full bg-slate-100 p-4 flex items-center gap-2  z-50'>
+      <section className='fixed bottom-0 w-full p-2.5 border-t  flex items-center gap-2 z-50'>
         <div>
-          <button onClick={handleUploadImageVideoOpen} className='relative flex justify-center items-center p-2 rounded-full hover:bg-purple-500 hover:text-white'>
+          <button onClick={handleUploadImageVideoOpen} className='relative flex justify-center items-center p-2 rounded-full hover:bg-primary hover:text-white'>
             <IoAddOutline
               size={25}
             />
@@ -417,15 +480,23 @@ const MessagePage = () => {
         {/* Upload options */}
         {
           openImageVideoUpload && (
-            <div className='absolute bottom-16 left-8 w-48 bg-slate-200 p-3 shadow rounded-lg'>
+            <div className='absolute bottom-16 left-8 w-48 backdrop-filter backdrop-blur-lg  p-3 shadow rounded-lg'>
               <form className=''>
-                <label htmlFor='uploadImage' className='flex items-center gap-3 p-2 hover:bg-slate-300 rounded-md cursor-pointer'>
+                <label htmlFor='uploadImage' className='flex items-center gap-3 p-2 hover:bg-secondary rounded-md cursor-pointer'>
                   <div className='text-indigo-600 '>
                     <IoImages size={18} />
                   </div>
                   <p>Image</p>
                 </label>
-                <label htmlFor='uploadVideo' className='flex items-center gap-3 p-2 hover:bg-slate-300 rounded-md cursor-pointer' >
+                <input
+                  type='file'
+                  id='uploadImage'
+                  onChange={handleUploadImage}
+                  className='hidden'
+                  accept="image/*"
+                />
+
+                <label htmlFor='uploadVideo' className='flex items-center gap-3 p-2 hover:bg-secondary rounded-md cursor-pointer'>
                   <div className='text-green-600'>
                     <IoVideocam size={18} />
                   </div>
@@ -433,17 +504,13 @@ const MessagePage = () => {
                 </label>
                 <input
                   type='file'
-                  id='uploadImage'
-                  onChange={handleUploadImage}
-                  className='hidden'
-                />
-                <input
-                  type='file'
                   id='uploadVideo'
                   onChange={handleUploadVideo}
                   className='hidden'
+                  accept="video/*"
                 />
-                <label htmlFor='uploadDocument' className='flex items-center gap-3 p-2 hover:bg-slate-300 rounded-md cursor-pointer'>
+
+                <label htmlFor='uploadDocument' className='flex items-center gap-3 p-2 hover:bg-secondary rounded-md cursor-pointer'>
                   <div className='text-blue-600'>
                     <IoDocumentText size={18} />
                   </div>
@@ -454,7 +521,12 @@ const MessagePage = () => {
                   id='uploadDocument'
                   onChange={handleUploadDocument}
                   className='hidden'
+                  accept='.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+           .xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+           .ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,
+           .pdf,application/pdf,text/plain,application/vnd.ms-office'
                 />
+
               </form>
             </div>
           )
@@ -467,17 +539,30 @@ const MessagePage = () => {
             value={message.text}
             onChange={handleOnChange}
             placeholder='&nbsp; Type a message...'
-            className='flex-1 p-2 rounded-full bg-slate-200 focus:outline-none w-full'
+            className='flex-1 p-2 rounded-full border backdrop-filter backdrop-blur-lg  focus:outline-none w-full'
           />
 
 
-          <button className='hover:bg-purple-500 hover:text-white p-2 rounded-full text-secondary'>
+          <button className='hover:bg-primary hover:text-white p-2 rounded-full text-primary'>
             <IoSend
               size={25}
             />
           </button>
         </form>
       </section>
+      {modalImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" onClick={() => setModalImage(null)}>
+          <div className="relative w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-4xl h-[60vh] sm:h-[70vh] md:h-[80vh] rounded-lg overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <img
+                src={modalImage}
+                alt="Full size"
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

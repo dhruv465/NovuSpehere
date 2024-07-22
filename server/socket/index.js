@@ -84,6 +84,11 @@ io.on('connection', async (socket) => {
             videoUrl: data.videoUrl,
             documentUrl: data.documentUrl,
             documentName: data.documentName,
+            documentType: data.documentType,
+            sender: data.sender,
+            receiver: data.receiver,
+            conversation: conversation._id,
+
             msgByUserId: data?.msgByUserId,
         });
         const saveMessage = await message.save();

@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react'
-import { IoChatbox, IoChatboxOutline, IoImages, IoMoonSharp, IoSunnySharp, IoVideocam } from "react-icons/io5";
-import { TbUserPlus } from "react-icons/tb";
-import { NavLink, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { BsThreeDotsVertical } from "react-icons/bs";
+import { FiEdit } from "react-icons/fi";
+import { HiOutlineDotsCircleHorizontal } from 'react-icons/hi';
+import { IoArrowUndoSharp, IoImages, IoVideocam } from "react-icons/io5";
 import { TbLogout2 } from "react-icons/tb";
-import Avatar from '../Mycomponents/Avatar'
 import { useDispatch, useSelector } from 'react-redux';
-import EditUserDetails from './EditUserDetails';
-import Divider from './Divider';
-import { IoArrowUndoSharp } from "react-icons/io5";
-import SearchUser from './SearchUser';
+import { NavLink, useNavigate } from 'react-router-dom';
+import Avatar from '../Mycomponents/Avatar';
 import { logout } from '../redux/userSlice';
-import { HiOutlineDotsVertical } from 'react-icons/hi';
+import EditUserDetails from './EditUserDetails';
+import SearchUser from './SearchUser';
+
 
 const Sidebar = () => {
     const user = useSelector(state => state?.user)
@@ -28,7 +28,7 @@ const Sidebar = () => {
             socketConnection.on('conversation', (data) => {
                 console.log('conversation', data)
 
-                const conversationUserData = data.map((conversationUser, index) => {
+                const conversationUserData = data.map((conversationUser) => {
 
                     if (conversationUser?.sender?._id === conversationUser?.receiver?._id) {
                         return {
@@ -67,15 +67,8 @@ const Sidebar = () => {
         setIsModalOpen(!isModalOpen);
     };
 
-    const [isDarkMode, setIsDarkMode] = useState(document.body.classList.contains('dark'));
+    const [isDarkMode] = useState(document.body.classList.contains('dark'));
 
-    const toggleTheme = () => {
-        setIsDarkMode(prevMode => {
-            const newMode = !prevMode;
-            document.body.classList.toggle('dark', newMode);
-            return newMode;
-        });
-    };
 
     useEffect(() => {
         if (isDarkMode) {
@@ -94,48 +87,45 @@ const Sidebar = () => {
     }
 
     return (
-        <div className='w-full h-full grid grid-cols-[48px,1fr] bg-white drop-shadow-2xl'>
-            <div className='bg-slate-100 w-12 h-full rounded-tr-lg rounded-br-lg py-5 text-slate-600 flex flex-col justify-between'>
-                <div>
-                    <NavLink className={({ isActive }) => `w-10 h-10 m-1 flex justify-center items-center cursor-pointer hover:bg-slate-200 rounded-full ${isActive && "bg-slate-200"}`} title='chat'>
-                        <IoChatbox size={20} />
-                    </NavLink>
-                    <div onClick={() => { setOpenSearchUser(true) }} className='w-10 h-10 m-1 flex justify-center items-center cursor-pointer hover:bg-slate-200 rounded-full' title='add friend'>
-                        <TbUserPlus size={20} />
-                    </div>
-                </div>
-                <div className='flex flex-col items-center'>
-                    <button className='mx-auto' title={user?.name} onClick={() => setEditUserOpen(true)}>
-                        <Avatar width={40} height={40} name={user?.name} imageUrl={user.profile_pic} userId={user?._id} />
-                    </button>
-                    <button className='w-10 h-10 m-1 flex justify-center items-center cursor-pointer hover:bg-slate-200 rounded-full' title='logout' onClick={handleLogout}>
-                        <span className='-ml-2'>
-                            <TbLogout2 size={20} />
-                        </span>
-                    </button>
-                </div>
-            </div>
+        <div className='w-full h-full backdrop-filter  backdrop-blur-sm bg-white border-l-0 border-r  '>
 
-            <div className='w-full'>
-                <div className='h-16 flex items-center justify-between'>
-                    <h2 className='text-xl font-bold p-4 text-slate-800'>
-                        Chats
+
+            <div className='w-full col-start-2'>
+                <div className='h-16 flex items-center justify-between pr-4 bg-transparent'>
+                    <h2 className='text-2xl font-bold pl-4 text-black font-noto-sans'>
+                        Messages
                     </h2>
-                    <div className='flex items-center mr-4' >
+
+                    <div className='flex items-center mr-4 space-x-4'>
                         <button
-                            className='p-2 rounded-full hover:bg-slate-300'
+                            className='p-2 rounded-full text-primary'
                             title='Menu'
                             onClick={toggleModal}
                         >
-                            <HiOutlineDotsVertical size={25} />
+                            <HiOutlineDotsCircleHorizontal size={25} />
+                        </button>
+                        <button
+                            className='rounded-full p-2 text-primary'
+
+                            onClick={() => {
+
+                                setOpenSearchUser(true)
+                            }}
+                        >
+                            <span>
+                                <FiEdit size={20} />
+                            </span>
+
                         </button>
                     </div>
+
+
                 </div>
 
-                <div className='bg-slate-200 p-[0.5px] rounded-lg'>
+                <div className='bg-slate-200 p-[0.5px] rounded-lg mx-4'>
                     {/* <Divider /> */}
                 </div>
-                <div className=' h-[calc(100vh-65px)] overflow-x-hidden overflow-y-auto scrollbar'>
+                <div className=' h-[calc(100vh-65px)] overflow-x-hidden overflow-y-auto scrollbar '>
                     {
                         allUser.length === 0 && (
                             <div>
@@ -148,10 +138,10 @@ const Sidebar = () => {
                     }
 
                     {
-                        allUser.map((conv, index) => {
+                        allUser.map((conv) => {
                             return (
                                 <NavLink to={"/" + conv?.userDetails?._id} key={conv?._id}>
-                                    <div className='flex items-center p-4 hover:bg-slate-50 border-b border-slate-100 cursor-pointer rounded-md'>
+                                    <div className='flex items-center p-4 hover:bg-secondary border-b cursor-pointer '>
                                         <div>
                                             <Avatar width={40} height={40} imageUrl={conv?.userDetails?.profile_pic} name={conv?.userDetails?.name} />
                                         </div>
@@ -214,7 +204,7 @@ const Sidebar = () => {
                                         </div>
                                         {
                                             Boolean(conv?.unseenMsg) && (
-                                                <p className='text-xs w-6 h-6 flex justify-center items-center ml-auto p-1 bg-secondary text-white font-semibold rounded-full'>
+                                                <p className='text-xs w-6 h-6 flex justify-center items-center ml-auto p-1 bg-primary text-white font-semibold rounded-full'>
                                                     {conv?.unseenMsg}
                                                 </p>
                                             )
@@ -229,51 +219,25 @@ const Sidebar = () => {
 
             {/* Open Menu */}
             {isModalOpen && (
-                <div className='absolute top-14 right-8 w-48 bg-slate-200 p-3 shadow rounded-lg'>
+                <div className='absolute top-14 right-8 w-48 backdrop-filter backdrop-blur-lg p-3 shadow rounded-lg'>
+
                     <div className='w-full h-full'>
                         <button
-                            className='w-full flex items-center gap-2 p-2 hover:bg-slate-300  rounded-md'
-                            onClick={toggleTheme}
-                        >
-                            <span>
-                                {isDarkMode ? <IoSunnySharp size={20} /> : <IoMoonSharp size={20} />}
-                            </span>
-                            <span>
-                                {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-                            </span>
-                        </button>
-                        <button
-                            className='w-full flex items-center gap-2 p-2 hover:bg-slate-300 rounded-md'
+                            className='w-full flex items-center gap-2 p-2 hover:bg-secondary rounded-md'
                             onClick={() => {
                                 toggleModal()
                                 setEditUserOpen(true)
                             }}
                         >
                             <span>
-                                <HiOutlineDotsVertical size={20} />
+                                <BsThreeDotsVertical size={20} />
                             </span>
                             <span>
-                                Edit Profile
-                            </span>
-                        </button>
-                    </div>
-                    <div className='w-full h-full'>
-                        <button
-                            className='w-full flex items-center gap-2 p-2 hover:bg-slate-300 rounded-md'
-                            onClick={() => {
-                                toggleModal()
-                                setOpenSearchUser(true)
-                            }}
-                        >
-                            <span>
-                                <TbUserPlus size={20} />
-                            </span>
-                            <span>
-                                Add Friend
+                                Edit profile
                             </span>
                         </button>
                         <button
-                            className='w-full flex items-center gap-2 p-2 hover:bg-slate-300 rounded-md'
+                            className='w-full flex items-center gap-2 p-2 hover:bg-secondary rounded-md'
                             onClick={handleLogout}
                         >
                             <span>

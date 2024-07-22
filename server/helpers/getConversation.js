@@ -30,6 +30,10 @@ const getConversation = async (currentUserId) => {
                     videoUrl: lastMessage?.videoUrl,
                     documentUrl: lastMessage?.documentUrl, // Include document URL
                     documentName: lastMessage?.documentName, // Include document name
+                    documentType: lastMessage?.documentType, // Include document type
+                    sender: lastMessage?.sender,
+                    receiver: lastMessage?.receiver,
+                    isRead: lastMessage?.isRead,
                     msgByUserId: lastMessage?.msgByUserId,
                     seen: lastMessage?.seen,
                     createdAt: lastMessage?.createdAt,
