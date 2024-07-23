@@ -8,7 +8,7 @@ const { app, server } = require('./socket/index')
 
 // const app = express()
 app.use(cors({
-    origin: 'https://novuspehere.onrender.com',
+    origin: 'process.env.FRONTEND_URL',
     credentials: true
 }))
 
