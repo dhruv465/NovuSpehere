@@ -8,7 +8,7 @@ const { app, server } = require('./socket/index')
 
 // const app = express()
 app.use(cors({
-    origin: 'https://novu-spehere.vercel.app',
+    origin: 'process.env.FRONTEND_URL',
     credentials: true
 }))
 
