@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { BsThreeDotsVertical } from "react-icons/bs";
+import { BsPeople, BsThreeDotsVertical } from "react-icons/bs";
 import { FiEdit } from "react-icons/fi";
 import { HiOutlineDotsCircleHorizontal } from 'react-icons/hi';
-import { IoArrowUndoSharp, IoImages, IoVideocam } from "react-icons/io5";
+import { IoImages, IoSearch, IoVideocam } from "react-icons/io5";
 import { TbLogout2 } from "react-icons/tb";
 import { useDispatch, useSelector } from 'react-redux';
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -87,7 +87,7 @@ const Sidebar = () => {
     }
 
     return (
-        <div className='w-full h-full backdrop-filter  backdrop-blur-sm bg-white border-l-0 border-r  '>
+        <div className='w-full h-full backdrop-filter backdrop-blur-sm bg-white border-l-0 border-r  '>
 
 
             <div className='w-full col-start-2'>
@@ -122,15 +122,27 @@ const Sidebar = () => {
 
                 </div>
 
-                <div className='bg-slate-200 p-[0.5px] rounded-lg mx-4'>
-                    {/* <Divider /> */}
+                <div className='bg-secondary   font-noto-sans p-[0.5px] mb-4 rounded-lg mx-4 '>
+                    <div className='flex  justify-center items-center pl-2 text-slate-400'>
+                        <IoSearch
+                            size={22}
+                        />
+                        <input
+                            type="text" 
+                            onClick={() => {
+                                setOpenSearchUser(true)
+                            }}
+                            placeholder='Search'
+                            className='w-full p-2 bg-transparent focus:outline-none text-slate-800'
+                        />
+                    </div>
                 </div>
                 <div className=' h-[calc(100vh-65px)] overflow-x-hidden overflow-y-auto scrollbar '>
                     {
                         allUser.length === 0 && (
-                            <div>
+                            <div className='drop-shadow-lg'>
                                 <div className='flex justify-center items-center my-4 text-slate-500'>
-                                    <IoArrowUndoSharp size={50} />
+                                    <BsPeople size={50} />
                                 </div>
                                 <p className='text-lg text-center text-slate-400'>Find your friends to chat with them.</p>
                             </div>

@@ -106,6 +106,7 @@ const CheckPasswordPage = () => {
               value={data.password}
               onChange={handleOnChange}
               required
+              autoFocus
             />
           </div>
 

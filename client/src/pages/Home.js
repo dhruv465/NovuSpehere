@@ -63,7 +63,7 @@ const Home = () => {
   const basePath = location.pathname === '/'
   return (
     // Add the padding for the main page and change its colors
-    <div className='grid lg:grid-cols-[500px,1fr] h-screen max-h-screen' >
+    <div className='grid lg:grid-cols-[500px,1fr] h-screen max-h-screen overflow-y-hidden	' >
       <section className={`shadow-2xl ${!basePath && "hidden"} lg:block `}>
         <Sidebar />
       </section>

@@ -79,6 +79,7 @@ const CheckEmailPage = () => {
               value={data.email}
               onChange={handleOnChange}
               required
+              autoFocus
             />
           </div>
 
