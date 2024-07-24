@@ -6,6 +6,7 @@ const userDetails = require('../controller/userDetails')
 const logout = require('../controller/logout')
 const updateUserDetails = require('../controller/updateUserDetails')
 const searchUser = require('../controller/SearchUser')
+const translateController = require('../controller/translateController');
 
 
 const router = express.Router()
@@ -31,6 +32,8 @@ router.post('/update-user',updateUserDetails)
 //search user
 router.post('/search-user',searchUser)
 
+//route for translate
+router.post('/translate', translateController.translateText);
 
 
 module.exports = router

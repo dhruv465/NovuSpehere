@@ -1,13 +1,12 @@
 import moment from 'moment'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { HiOutlineDotsVertical } from 'react-icons/hi'
-import { IoAddOutline, IoChevronBack, IoCloseOutline, IoDocumentText, IoImages, IoSend, IoVideocam } from 'react-icons/io5'
+import { IoAddOutline, IoChevronBack, IoCloseOutline, IoDocumentText, IoEllipsisHorizontal, IoImages, IoLanguage, IoSend, IoVideocam } from 'react-icons/io5'
 import { useSelector } from 'react-redux'
 import { Link, useParams } from 'react-router-dom'
 import uploadFile from '../helpers/uploadFile'
 import Avatar from './Avatar'
 import Loading from './Loader'
-import gemini from '../assets/gemini.svg'
 
 
 const MessagePage = () => {
@@ -15,6 +14,41 @@ const MessagePage = () => {
   const socketConnection = useSelector(state => state?.user?.socketConnection)
   const [modalImage, setModalImage] = useState(null);
   const [activeMenu, setActiveMenu] = useState(null);
+  const [showMenu, setShowMenu] = useState(false);
+  const [showLanguages, setShowLanguages] = useState(false);
+
+  const handleMenuClick = () => {
+    setShowMenu(!showMenu);
+    setShowLanguages(false);
+  };
+
+  const handleTranslateClick = (e) => {
+    e.preventDefault(); // Prevent form submission
+    setShowLanguages(true);
+  };
+
+  const handleLanguageSelect = async (lang) => {
+    
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/translate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: message.text, targetLang: lang }),
+      });
+      const data = await response.json();
+      setMessage(prev => ({ ...prev, text: data.translatedText }));
+    } catch (error) {
+      console.error('Error translating message:', error);
+    } finally {
+      setShowLanguages(false);
+      setShowMenu(false);
+    }
+  };
+  
+
+  const languages = ['English', 'es', 'fr', 'de', 'it', 'zh', 'ja']; 
 
   const user = useSelector(state => state?.user)
   const [dataUser, setDataUser] = useState({
@@ -385,6 +419,11 @@ const MessagePage = () => {
                             className='w-full max-h-40 sm:max-h-60 md:max-h-80 lg:max-h-40 object-contain rounded-lg cursor-pointer'
                             onClick={() => setModalImage(msg.imageUrl)}
                           />
+                          {/* {msg.text && (
+                            <div className="image-caption p-2 bg-primary rounded-b-lg">
+                              <p className="text-sm text-white ">{msg.text}</p>
+                            </div>
+                          )} */}
                           <button
                             className="absolute top-2 right-2 p-1 bg-black bg-opacity-50 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                             onClick={(e) => {
@@ -423,8 +462,20 @@ const MessagePage = () => {
                         </div>
                       )}
                       {msg.videoUrl && (
-                        <video src={msg.videoUrl} className='w-full max-h-40 object-contain rounded-lg' controls />
+                        <div className="video-message">
+                          <video
+                            src={msg.videoUrl}
+                            className='w-full max-h-40 object-contain rounded-t-lg'
+                            controls
+                          />
+                          {/* {msg.text && (
+                            <div className="video-caption p-2 bg-gray-100 rounded-b-lg">
+                              <p className="text-sm text-gray-800">{msg.text}</p>
+                            </div>
+                          )} */}
+                        </div>
                       )}
+
                       {msg.documentUrl && (
                         <div className='document-preview flex cursor-pointer bg-secondary p-4 rounded-xl'>
                           <div className='drop-shadow-xl'>
@@ -526,7 +577,7 @@ const MessagePage = () => {
            .xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
            .ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,
            .pdf,application/pdf,text/plain,application/vnd.ms-office'
-           disabled
+                  disabled
                 />
 
               </form>
@@ -536,14 +587,45 @@ const MessagePage = () => {
 
         {/* input box for message */}
         <form className='w-full max-w-screen-xl flex gap-3 ' onSubmit={handleSendMessage}>
-          <input
-            type='text'
-            value={message.text}
-            onChange={handleOnChange}
-            placeholder='&nbsp; Type a message...'
-            className='flex-1 p-2 rounded-full border backdrop-filter backdrop-blur-lg  focus:outline-none w-full'
-          />
-
+          <div className="relative flex-1">
+            <input
+              type='text'
+              value={message.text}
+              onChange={handleOnChange}
+              placeholder='Type a message...'
+              className='flex-1 p-2 pr-10 rounded-full border backdrop-filter backdrop-blur-lg focus:outline-none w-full'
+            />
+            <button
+              type="button"
+              onClick={handleMenuClick}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              <IoEllipsisHorizontal size={20} />
+            </button>
+            {showMenu && (
+          <div className="absolute right-0 bottom-full mb-2 bg-white shadow-lg rounded-md py-2 z-10">
+            <button
+              className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm flex items-center"
+              onClick={handleTranslateClick}
+            >
+              <IoLanguage className="mr-2" /> Translate my Message
+            </button>
+          </div>
+        )}
+             {showLanguages && (
+          <div className="absolute right-0 bottom-full mb-2 bg-white shadow-lg rounded-md py-2 z-20 max-h-60 overflow-y-auto">
+            {languages.map((lang, index) => (
+              <button
+                key={index}
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                onClick={() => handleLanguageSelect(lang)}
+              >
+                {lang}
+              </button>
+            ))}
+          </div>
+        )}
+          </div>
           <button className='' title='Ask Gemo to write a message' >
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M14 28C14 26.0633 13.6267 24.2433 12.88 22.54C12.1567 20.8367 11.165 19.355 9.905 18.095C8.645 16.835 7.16333 15.8433 5.46 15.12C3.75667 14.3733 1.93667 14 0 14C1.93667 14 3.75667 13.6383 5.46 12.915C7.16333 12.1683 8.645 11.165 9.905 9.905C11.165 8.645 12.1567 7.16333 12.88 5.46C13.6267 3.75667 14 1.93667 14 0C14 1.93667 14.3617 3.75667 15.085 5.46C15.8317 7.16333 16.835 8.645 18.095 9.905C19.355 11.165 20.8367 12.1683 22.54 12.915C24.2433 13.6383 26.0633 14 28 14C26.0633 14 24.2433 14.3733 22.54 15.12C20.8367 15.8433 19.355 16.835 18.095 18.095C16.835 19.355 15.8317 20.8367 15.085 22.54C14.3617 24.2433 14 26.0633 14 28Z" fill="url(#paint0_radial_16771_53212)" />
