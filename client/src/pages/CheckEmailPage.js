@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios'
 import toast from 'react-hot-toast';
-import { FaUserAstronaut } from "react-icons/fa";
+import logo from '../assets/logo.png'
 
 
 const CheckEmailPage = () => {
@@ -42,7 +42,7 @@ const CheckEmailPage = () => {
           email: '',
 
         })
-        navigate('/password',{
+        navigate('/password', {
           state: response?.data?.data
         })
       }
@@ -52,16 +52,19 @@ const CheckEmailPage = () => {
     }
   }
   return (
-    <div className='mt-5'>
-      <div className='bg-white w-full max-w-md rounded-xl overflow-hidden p-4 mx-auto'>
+    <div className='m-4 flex items-center justify-center h-screen '>
+      <div className='bg-white drop-shadow-lg shadow-2xl  w-full max-w-md rounded-xl overflow-hidden p-4 mx-auto'>
 
         <div>
-        <FaUserAstronaut 
-        size={80}
-        className='mx-auto w-fit mb-2'
-        />
+          <img
+            src={logo}
+            alt='logo'
+            width={80}
+            height={80}
+            className='mx-auto mb-2'
+          />
         </div>
-        <h3>Welcome to Chat app!</h3>
+        <h3 className='flex justify-center'>Welcome to NovuSphere!</h3>
 
         <form className='mt-3 grid gap-4 ' onSubmit={handleSubmit}>
 

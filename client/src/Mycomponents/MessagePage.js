@@ -526,6 +526,7 @@ const MessagePage = () => {
            .xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
            .ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,
            .pdf,application/pdf,text/plain,application/vnd.ms-office'
+           disabled
                 />
 
               </form>

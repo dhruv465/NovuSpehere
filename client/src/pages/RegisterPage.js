@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import uploadFile from '../helpers/uploadFile';
 import axios from 'axios'
 import toast from 'react-hot-toast';
+import logo from '../assets/logo.png'
 
 
 const RegisterPage = () => {
@@ -79,9 +80,18 @@ const RegisterPage = () => {
   }
 
   return (
-    <div className='mt-5'>
-      <div className='bg-white w-full max-w-md rounded-xl overflow-hidden p-4 mx-auto'>
-        <h3>Welcome to Chat app!</h3>
+    <div className='m-4 flex items-center justify-center h-screen'>
+      <div className='bg-white drop-shadow-lg shadow-2xl w-full max-w-md rounded-xl overflow-hidden p-4 mx-auto'>
+      <div>
+          <img
+            src={logo}
+            alt='logo'
+            width={80}
+            height={80}
+            className='mx-auto mb-2'
+          />
+        </div>
+        <h3 className='flex justify-center'>Welcome to NovuSphere!</h3>
 
         <form className='mt-4 grid gap-4 ' onSubmit={handleSubmit}>
           <div className='mb-4'>
@@ -160,6 +170,7 @@ const RegisterPage = () => {
               type='file'
               name='profile_pic'
               onChange={handleUploadPhoto}
+              accept="image/*"
 
             />
           </div>

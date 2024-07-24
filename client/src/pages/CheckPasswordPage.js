@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios'
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { FaUserAstronaut } from "react-icons/fa";
+import { useDispatch } from 'react-redux';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Avatar from '../Mycomponents/Avatar';
-import { useDispatch } from 'react-redux'
-import { setToken, setUser } from '../redux/userSlice'
+import { setToken } from '../redux/userSlice';
 
 
 const CheckPasswordPage = () => {
@@ -26,7 +25,7 @@ const CheckPasswordPage = () => {
       navigate('/email')
     }
 
-  },[])
+  }, [])
 
   const handleOnChange = (e) => {
     const { name, value } = e.target
@@ -73,8 +72,8 @@ const CheckPasswordPage = () => {
     }
   }
   return (
-    <div className='mt-5'>
-      <div className='bg-white w-full max-w-md rounded-xl overflow-hidden p-4 mx-auto'>
+    <div className='m-4 flex items-center justify-center h-screen'>
+      <div className='bg-white drop-shadow-lg shadow-2xl w-full max-w-md rounded-xl overflow-hidden p-4 mx-auto'>
 
         <div className='w-fit mx-auto mb-2 flex justify-center items-center flex-col'>
           {/* <FaUserAstronaut
@@ -89,10 +88,7 @@ const CheckPasswordPage = () => {
           />
           <h2 className='font-semibold text-lg mt-1 '>{location?.state?.name}</h2>
         </div>
-
         <form className='mt-3 grid gap-4 ' onSubmit={handleSubmit}>
-
-
           <div className='mb-3'>
             <label className='block text-gray-700 text-sm font-bold mb-2' htmlFor='password'>
               Password :
@@ -109,16 +105,13 @@ const CheckPasswordPage = () => {
               autoFocus
             />
           </div>
-
           <button
             className='bg-primary hover:bg-primary-slight text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:shadow-outline tracking-wide'
             type='submit'
           >
             Login
           </button>
-
         </form>
-
         <p className='my-3 text-center'><Link to={"/forgot-password"} className='hover:text-primary hover:underline font-semibold'> Forgot password?</Link></p>
       </div>
     </div>
