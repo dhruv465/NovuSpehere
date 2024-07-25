@@ -7,6 +7,7 @@ import { Link, useParams } from 'react-router-dom'
 import uploadFile from '../helpers/uploadFile'
 import Avatar from './Avatar'
 import Loading from './Loader'
+import { IoMdMore } from "react-icons/io";
 
 
 const MessagePage = () => {
@@ -27,8 +28,8 @@ const MessagePage = () => {
     setShowLanguages(true);
   };
 
-  const handleLanguageSelect = async (lang) => {
-    
+  const handleLanguageSelect = async (e, lang) => {
+    e.preventDefault(); // Prevent form submission
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/translate`, {
         method: 'POST',
@@ -46,9 +47,22 @@ const MessagePage = () => {
       setShowMenu(false);
     }
   };
-  
 
-  const languages = ['English', 'es', 'fr', 'de', 'it', 'zh', 'ja']; 
+
+  const languageMap = {
+    en: 'English',
+    es: 'Spanish',
+    hi: 'Hindi',
+    mr: 'Marathi',
+    ar: 'Arabic',
+    bn: 'Bengali',
+    pt: 'Portuguese',
+    ru: 'Russian',
+    ja: 'Japanese',
+    de: 'German',
+    zh: 'Chinese',
+  };
+
 
   const user = useSelector(state => state?.user)
   const [dataUser, setDataUser] = useState({
@@ -245,18 +259,12 @@ const MessagePage = () => {
 
   return (
     <div className=''>
-      <header className='sticky top-0 h-16  bg-header border-b	backdrop-filter backdrop-blur-lg  shadow-md flex justify-between items-center px-4'>
-        <div className='flex  items-center gap-2'>
+      <header className='sticky top-0 h-16 bg-header border-b backdrop-filter backdrop-blur-lg shadow-md flex justify-between items-center px-4'>
+        <div className='flex items-center gap-2'>
           <Link to={"/"} className='rounded-full lg:hidden'>
-
-            <IoChevronBack
-              size={25}
-            />
-
+            <IoChevronBack size={25} />
           </Link>
-          <div
-            className='m-2'
-          >
+          <div className='m-2'>
             <Avatar
               width={50}
               height={50}
@@ -276,7 +284,27 @@ const MessagePage = () => {
             </p>
           </div>
         </div>
-
+        <div className='relative'>
+          <button
+            onClick={handleMenuClick}
+            className='p-2 rounded-full hover:bg-gray-200'
+          >
+            <IoMdMore size={24} />
+          </button>
+          {showMenu && (
+            <div className='absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md py-2 z-20'>
+              <h4 className='px-4 py-2 font-semibold'>Choose Receiver Language:</h4>
+              <ul>
+                {/* Example languages, adjust as needed */}
+                {['English', 'Spanish', 'French', 'German', 'Chinese'].map((lang) => (
+                  <li key={lang} className='px-4 py-2 hover:bg-gray-100 cursor-pointer' onClick={() => handleLanguageSelect(lang)}>
+                    {lang}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
       </header>
 
       {/* Message container */}
@@ -395,28 +423,20 @@ const MessagePage = () => {
           {allMessage.length > 0 && (
             allMessage.map((msg, index) => {
               return (
-                <div key={index} className={`flex flex-col py-2 max-w[280px] ${msg?.msgByUserId === user?._id ? 'items-end' : 'items-start'} gap-2`}>
-                  <div className={`flex ${msg?.msgByUserId === user?._id ? 'flex-row-reverse' : 'flex-row'}`}>
-                    {/* <Avatar
-                        width={40}
-                        height={40}
-                        imageUrl={msg?.msgByUserId === user?._id ? user?.profile_pic : dataUser?.profile_pic}
-                        name={msg?.msgByUserId === user?._id ? user?.name : dataUser?.name}
-                        userId={msg?.msgByUserId === user?._id ? user?._id : dataUser?._id}
-                      /> */}
-                    <div className={`transition-shadow mt-2 lg:max-w-xl flex-shrink-0 md:max-w-sm ${user._id === msg.msgByUserId ? "ml-auto" : ""}`}>
+                <div key={index} className={`flex flex-col py-2 w-full ${msg?.msgByUserId === user?._id ? 'items-end' : 'items-start'} gap-2`}>
+                  <div className={`flex ${msg?.msgByUserId === user?._id ? 'flex-row-reverse' : 'flex-row'} w-full`}>
+                    <div className={`message-bubble transition-shadow mt-2 ${user._id === msg.msgByUserId ? "ml-auto" : "mr-auto"}`}>
                       {msg.text && (
-                        <div className={`p-3 rounded-3xl ${user._id === msg.msgByUserId ? "bg-primary text-white" : "bg-tertiary"}`}>
+                        <div className={`p-3 rounded-3xl break-words inline-block max-w-full ${user._id === msg.msgByUserId ? "bg-primary text-white" : "bg-tertiary"}`}>
                           <p className='text-sm'>{msg.text}</p>
                         </div>
                       )}
                       {msg.imageUrl && (
-                        <div className="relative group">
+                        <div className="relative group w-full">
                           <img
                             src={msg.imageUrl}
                             alt='messageimage'
-
-                            className='w-full max-h-40 sm:max-h-60 md:max-h-80 lg:max-h-40 object-contain rounded-lg cursor-pointer'
+                            className='w-full h-auto max-h-40 sm:max-h-60 md:max-h-80 object-contain rounded-lg cursor-pointer'
                             onClick={() => setModalImage(msg.imageUrl)}
                           />
                           {/* {msg.text && (
@@ -462,10 +482,10 @@ const MessagePage = () => {
                         </div>
                       )}
                       {msg.videoUrl && (
-                        <div className="video-message">
+                        <div className="video-message w-full">
                           <video
                             src={msg.videoUrl}
-                            className='w-full max-h-40 object-contain rounded-t-lg'
+                            className='w-full h-auto max-h-40 object-contain rounded-t-lg'
                             controls
                           />
                           {/* {msg.text && (
@@ -475,37 +495,33 @@ const MessagePage = () => {
                           )} */}
                         </div>
                       )}
-
                       {msg.documentUrl && (
-                        <div className='document-preview flex cursor-pointer bg-secondary p-4 rounded-xl'>
-                          <div className='drop-shadow-xl'>
+                        <div className='document-preview flex cursor-pointer bg-secondary p-4 rounded-xl w-full'>
+                          <div className='drop-shadow-xl flex-shrink-0'>
                             {msg.thumbnailUrl ? (
-                              <img src={msg.thumbnailUrl} alt="Document Preview" style={{ width: '100px', height: 'auto' }} />
+                              <img src={msg.thumbnailUrl} alt="Document Preview" className="w-16 h-auto" />
                             ) : (
-                              <IoDocumentText size={55} />
+                              <IoDocumentText size={40} />
                             )}
                           </div>
-                          <div className='leading-tight p-2 text-black w-56'>
-                            <a href={msg.documentUrl} target='_blank' rel='noreferrer'>
-                              <span className='ml-2 text-sm '>{msg.documentName}</span>
+                          <div className='leading-tight p-2 text-black flex-grow overflow-hidden'>
+                            <a href={msg.documentUrl} target='_blank' rel='noreferrer' className="block truncate">
+                              <span className='ml-2 text-sm'>{msg.documentName}</span>
                               <span className='ml-2 text-sm'>{msg.documentType}</span>
                             </a>
                           </div>
                         </div>
                       )}
                     </div>
-
                   </div>
 
                   {/* Status and Time Container */}
-                  <div className='text-xs flex space-x-2'>
-
+                  <div className={`text-xs flex space-x-2 ${user._id === msg.msgByUserId ? "justify-end" : "justify-start"}`}>
                     {msg.seen ? (
                       <span className="text-gray-500 font-medium">Seen</span>
                     ) : (
                       <span className='text-gray-600 font-medium'>Delivered</span>
                     )}
-
                     <p>{moment(msg.createdAt).format('hh:mm')}</p>
                   </div>
                 </div>
@@ -603,28 +619,29 @@ const MessagePage = () => {
               <IoEllipsisHorizontal size={20} />
             </button>
             {showMenu && (
-          <div className="absolute right-0 bottom-full mb-2 bg-white shadow-lg rounded-md py-2 z-10">
-            <button
-              className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm flex items-center"
-              onClick={handleTranslateClick}
-            >
-              <IoLanguage className="mr-2" /> Translate my Message
-            </button>
-          </div>
-        )}
-             {showLanguages && (
-          <div className="absolute right-0 bottom-full mb-2 bg-white shadow-lg rounded-md py-2 z-20 max-h-60 overflow-y-auto">
-            {languages.map((lang, index) => (
-              <button
-                key={index}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-                onClick={() => handleLanguageSelect(lang)}
-              >
-                {lang}
-              </button>
-            ))}
-          </div>
-        )}
+              <div className="absolute right-0 bottom-full mb-2 bg-white shadow-lg rounded-md py-2 z-10">
+                <button
+                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm flex items-center"
+                  onClick={handleTranslateClick}
+                >
+                  <IoLanguage className="mr-2" /> Translate my Message
+                </button>
+              </div>
+            )}
+            {showLanguages && (
+              <div className="absolute right-0 bottom-24 w-32 mb-2 bg-white shadow-lg rounded-md py-2 z-20 max-h-60 overflow-y-auto hide-scrollbar">
+                {Object.entries(languageMap).map(([langCode, langName]) => (
+                  <button
+                    key={langCode}
+                    onClick={(e) => handleLanguageSelect(e, langCode)}
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                  >
+                    {langName}
+                  </button>
+                ))}
+              </div>
+            )}
+
           </div>
           <button className='' title='Ask Gemo to write a message' >
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
