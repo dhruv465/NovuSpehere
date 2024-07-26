@@ -5,7 +5,7 @@ const getUserDetailsFromToken = require('../helpers/getUserDetailsFromToken')
 const UserModel = require('../models/UserModel')
 const { ConversationModel, MessageModel } = require('../models/ConversationModel')
 const getConversation = require('../helpers/getConversation')
-
+const { Translate } = require('@google-cloud/translate').v2;
 const app = express()
 
 /***socket connection */
@@ -62,18 +62,26 @@ io.on('connection', async (socket) => {
         socket.emit('message', getConversationMessage?.messages || [])
     })
 
+
+
+
+    const { Translate } = require('@google-cloud/translate').v2;
+
+    // Initialize the Google Cloud Translation client
+    const translate = new Translate({ key: process.env.GOOGLE_CLOUD_API_KEY });
+
     socket.on('new message', async (data) => {
         let conversation = await ConversationModel.findOne({
             "$or": [
-                { sender: data?.sender, receiver: data?.receiver },
-                { sender: data?.receiver, receiver: data?.sender }
+                { sender: data.sender, receiver: data.receiver },
+                { sender: data.receiver, receiver: data.sender }
             ]
         });
 
         if (!conversation) {
             const createConversation = new ConversationModel({
-                sender: data?.sender,
-                receiver: data?.receiver
+                sender: data.sender,
+                receiver: data.receiver
             });
             conversation = await createConversation.save();
         }
@@ -88,31 +96,57 @@ io.on('connection', async (socket) => {
             sender: data.sender,
             receiver: data.receiver,
             conversation: conversation._id,
-
-            msgByUserId: data?.msgByUserId,
+            msgByUserId: data.msgByUserId,
         });
+
         const saveMessage = await message.save();
 
-        await ConversationModel.updateOne({ _id: conversation?._id }, {
-            "$push": { messages: saveMessage?._id }
+        await ConversationModel.updateOne({ _id: conversation._id }, {
+            "$push": { messages: saveMessage._id }
         });
+
+        // Get receiver's preferred language(s)
+        const receiverPreferences = await UserModel.findById(data.receiver).select('languages');
+        const receiverLanguages = receiverPreferences.languages || ['en']; // default to English if not set
+
+        // Translate message text if necessary
+        let translatedText = data.text;
+        if (data.text && receiverLanguages.length > 0) {
+            try {
+                // Assuming we want to translate to the first language in the receiver's list
+                const targetLanguage = receiverLanguages[0];
+                if (targetLanguage !== 'en') {
+                    const [translation] = await translate.translate(data.text, targetLanguage);
+                    translatedText = translation;
+                }
+            } catch (error) {
+                console.error('Translation error:', error);
+            }
+        }
+
+        // Update the message with translated text
+        if (data.text) {
+            saveMessage.text = translatedText;
+            await saveMessage.save();
+        }
 
         const getConversationMessage = await ConversationModel.findOne({
             "$or": [
-                { sender: data?.sender, receiver: data?.receiver },
-                { sender: data?.receiver, receiver: data?.sender }
+                { sender: data.sender, receiver: data.receiver },
+                { sender: data.receiver, receiver: data.sender }
             ]
         }).populate('messages').sort({ updatedAt: -1 });
 
-        io.to(data?.sender).emit('message', getConversationMessage?.messages || []);
-        io.to(data?.receiver).emit('message', getConversationMessage?.messages || []);
+        io.to(data.sender).emit('message', getConversationMessage.messages || []);
+        io.to(data.receiver).emit('message', getConversationMessage.messages || []);
 
-        const conversationSender = await getConversation(data?.sender);
-        const conversationReceiver = await getConversation(data?.receiver);
+        const conversationSender = await getConversation(data.sender);
+        const conversationReceiver = await getConversation(data.receiver);
 
-        io.to(data?.sender).emit('conversation', conversationSender);
-        io.to(data?.receiver).emit('conversation', conversationReceiver);
+        io.to(data.sender).emit('conversation', conversationSender);
+        io.to(data.receiver).emit('conversation', conversationReceiver);
     });
+
 
 
     //sidebar

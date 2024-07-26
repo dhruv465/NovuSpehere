@@ -7,6 +7,7 @@ const logout = require('../controller/logout')
 const updateUserDetails = require('../controller/updateUserDetails')
 const searchUser = require('../controller/SearchUser')
 const translateController = require('../controller/translateController');
+const userController = require('../controller/userController');
 
 
 const router = express.Router()
@@ -15,25 +16,30 @@ const router = express.Router()
 router.post('/register', registerUser)
 
 //check user EMail
-router.post('/email',checkEmail)
+router.post('/email', checkEmail)
 
 //cehck user password
-router.post('/password',checkPassword)
+router.post('/password', checkPassword)
 
 //cehck user details
 router.get('/user-details', userDetails)
 
 //logout user
-router.get('/logout',logout)
+router.get('/logout', logout)
 
 //update user details
-router.post('/update-user',updateUserDetails)
+router.post('/update-user', updateUserDetails)
 
 //search user
-router.post('/search-user',searchUser)
+router.post('/search-user', searchUser)
 
 //route for translate
 router.post('/translate', translateController.translateText);
 
+// Update user language preferences
+router.put('/user/preferences', userController.updateUserPreferences);
+
+// Get user language preferences
+router.get('/user/:userId', userController.getUserPreferences);
 
 module.exports = router

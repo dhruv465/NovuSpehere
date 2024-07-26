@@ -1,14 +1,12 @@
-import moment from 'moment'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { HiOutlineDotsVertical } from 'react-icons/hi'
-import { IoAddOutline, IoChevronBack, IoCloseOutline, IoDocumentText, IoEllipsisHorizontal, IoImages, IoLanguage, IoSend, IoVideocam } from 'react-icons/io5'
-import { useSelector } from 'react-redux'
-import { Link, useParams } from 'react-router-dom'
-import uploadFile from '../helpers/uploadFile'
-import Avatar from './Avatar'
-import Loading from './Loader'
-import { IoMdMore } from "react-icons/io";
-
+import moment from 'moment';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { HiOutlineDotsVertical } from 'react-icons/hi';
+import { IoAddOutline, IoChevronBack, IoCloseOutline, IoDocumentText, IoEllipsisHorizontal, IoImages, IoLanguage, IoSend, IoVideocam } from 'react-icons/io5';
+import { useSelector } from 'react-redux';
+import { Link, useParams } from 'react-router-dom';
+import uploadFile from '../helpers/uploadFile';
+import Avatar from './Avatar';
+import Loading from './Loader';
 
 const MessagePage = () => {
   const params = useParams()
@@ -18,10 +16,10 @@ const MessagePage = () => {
   const [showMenu, setShowMenu] = useState(false);
   const [showLanguages, setShowLanguages] = useState(false);
 
-  const handleMenuClick = () => {
-    setShowMenu(!showMenu);
-    setShowLanguages(false);
-  };
+  const [loading, setLoading] = useState(false)
+  const [allMessage, setAllMessage] = useState([])
+  const currentMessage = useRef(null)
+
 
   const handleTranslateClick = (e) => {
     e.preventDefault(); // Prevent form submission
@@ -50,6 +48,7 @@ const MessagePage = () => {
 
 
   const languageMap = {
+    fr: 'French',
     en: 'English',
     es: 'Spanish',
     hi: 'Hindi',
@@ -62,7 +61,6 @@ const MessagePage = () => {
     de: 'German',
     zh: 'Chinese',
   };
-
 
   const user = useSelector(state => state?.user)
   const [dataUser, setDataUser] = useState({
@@ -79,12 +77,8 @@ const MessagePage = () => {
     documentUrl: "",
     videoUrl: "",
     documentName: ""
-
   });
 
-  const [loading, setLoading] = useState(false)
-  const [allMessage, setAllMessage] = useState([])
-  const currentMessage = useRef(null)
 
   useEffect(() => {
     if (currentMessage.current) {
@@ -108,14 +102,12 @@ const MessagePage = () => {
       .catch(error => console.error('Error downloading image:', error));
   }, []);
 
-
   const handleUploadImageVideoOpen = () => {
     setOpenImageVideoUpload(preve => !preve)
   }
 
   const handleUploadImage = async (e) => {
     const file = e.target.files[0]
-
     setLoading(true)
     const uploadPhoto = await uploadFile(file)
     setLoading(false)
@@ -138,10 +130,8 @@ const MessagePage = () => {
     })
   }
 
-
   const handleUploadVideo = async (e) => {
     const file = e.target.files[0]
-
     setLoading(true)
     const uploadPhoto = await uploadFile(file)
     setLoading(false)
@@ -154,6 +144,7 @@ const MessagePage = () => {
       }
     })
   }
+
   const handleClearUploadVideo = () => {
     setMessage(preve => {
       return {
@@ -179,7 +170,6 @@ const MessagePage = () => {
     });
   }
 
-
   const handleClearUploadDocument = () => {
     setMessage(preve => {
       return {
@@ -189,7 +179,6 @@ const MessagePage = () => {
       }
     });
   }
-
 
 
   useEffect(() => {
@@ -216,7 +205,6 @@ const MessagePage = () => {
     }
   }, [socketConnection, params?.userId, user]);
 
-
   const handleOnChange = (e) => {
     const { value } = e.target
 
@@ -228,9 +216,8 @@ const MessagePage = () => {
     })
   }
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = useCallback((e) => {
     e.preventDefault();
-
     if (message.text || message.imageUrl || message.videoUrl || message.documentUrl || message.documentName || message.documentType) {
       if (socketConnection) {
         socketConnection.emit('new message', {
@@ -254,12 +241,16 @@ const MessagePage = () => {
         });
       }
     }
-  }
+  }, [message, socketConnection, params.userId, user]);
+
+
+
+
 
 
   return (
     <div className=''>
-      <header className='sticky top-0 h-16 bg-header border-b backdrop-filter backdrop-blur-lg shadow-md flex justify-between items-center px-4'>
+      <header className='sticky top-0 h-16 bg-header border-b backdrop-filter backdrop-blur-lg shadow-lg flex justify-between items-center px-4'>
         <div className='flex items-center gap-2'>
           <Link to={"/"} className='rounded-full lg:hidden'>
             <IoChevronBack size={25} />
@@ -278,40 +269,16 @@ const MessagePage = () => {
               {dataUser?.name}
             </h3>
             <p className='-my-2 text-sm'>
-              {
-                dataUser.online ? <span className='text-primary'>online</span> : <span className='text-slate-400'>offline</span>
-              }
+              {dataUser.online ? <span className='text-primary'>online</span> : <span className='text-slate-400'>offline</span>}
             </p>
           </div>
         </div>
-        <div className='relative'>
-          <button
-            onClick={handleMenuClick}
-            className='p-2 rounded-full hover:bg-gray-200'
-          >
-            <IoMdMore size={24} />
-          </button>
-          {showMenu && (
-            <div className='absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md py-2 z-20'>
-              <h4 className='px-4 py-2 font-semibold'>Choose Receiver Language:</h4>
-              <ul>
-                {/* Example languages, adjust as needed */}
-                {['English', 'Spanish', 'French', 'German', 'Chinese'].map((lang) => (
-                  <li key={lang} className='px-4 py-2 hover:bg-gray-100 cursor-pointer' onClick={() => handleLanguageSelect(lang)}>
-                    {lang}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
+
       </header>
+
 
       {/* Message container */}
       <section className='h-[calc(100vh-128px)] overflow-x-hidden bg-white overflow-y-scroll scrollbar relative ' >
-
-
-
         {/* upload image */}
         {
           message.imageUrl && (
@@ -385,9 +352,6 @@ const MessagePage = () => {
             </div>
           )
         }
-
-
-
         {
           loading && (
             <div className='fixed top-0 left-0 bottom-0 right-0 bg-black z-50 bg-opacity-50 flex justify-center items-center'>
@@ -406,9 +370,7 @@ const MessagePage = () => {
           )
         }
         {/* Message container */}
-
         <div className='w-full max-w-screen-xl mx-auto p-4' ref={currentMessage}>
-
           {allMessage.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
               <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -439,11 +401,6 @@ const MessagePage = () => {
                             className='w-full h-auto max-h-40 sm:max-h-60 md:max-h-80 object-contain rounded-lg cursor-pointer'
                             onClick={() => setModalImage(msg.imageUrl)}
                           />
-                          {/* {msg.text && (
-                            <div className="image-caption p-2 bg-primary rounded-b-lg">
-                              <p className="text-sm text-white ">{msg.text}</p>
-                            </div>
-                          )} */}
                           <button
                             className="absolute top-2 right-2 p-1 bg-black bg-opacity-50 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                             onClick={(e) => {
@@ -488,11 +445,6 @@ const MessagePage = () => {
                             className='w-full h-auto max-h-40 object-contain rounded-t-lg'
                             controls
                           />
-                          {/* {msg.text && (
-                            <div className="video-caption p-2 bg-gray-100 rounded-b-lg">
-                              <p className="text-sm text-gray-800">{msg.text}</p>
-                            </div>
-                          )} */}
                         </div>
                       )}
                       {msg.documentUrl && (
@@ -525,16 +477,10 @@ const MessagePage = () => {
                     <p>{moment(msg.createdAt).format('hh:mm')}</p>
                   </div>
                 </div>
-
-
-
               )
             })
           )}
-
-
         </div>
-
       </section>
 
       <section className='fixed bottom-0 w-full p-2.5 border-t  flex items-center gap-2 z-50'>
@@ -563,7 +509,6 @@ const MessagePage = () => {
                   className='hidden'
                   accept="image/*"
                 />
-
                 <label htmlFor='uploadVideo' className='flex items-center gap-3 p-2 hover:bg-secondary rounded-md cursor-pointer'>
                   <div className='text-green-600'>
                     <IoVideocam size={18} />
@@ -577,7 +522,6 @@ const MessagePage = () => {
                   className='hidden'
                   accept="video/*"
                 />
-
                 <label htmlFor='uploadDocument' className='flex items-center gap-3 p-2 hover:bg-secondary rounded-md cursor-pointer'>
                   <div className='text-blue-600'>
                     <IoDocumentText size={18} />
@@ -593,9 +537,7 @@ const MessagePage = () => {
            .xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
            .ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,
            .pdf,application/pdf,text/plain,application/vnd.ms-office'
-                  disabled
                 />
-
               </form>
             </div>
           )
@@ -613,7 +555,10 @@ const MessagePage = () => {
             />
             <button
               type="button"
-              onClick={handleMenuClick}
+              onClick={() => {
+                setShowMenu(!showMenu);
+                setShowLanguages(false);
+              }}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
               <IoEllipsisHorizontal size={20} />
@@ -641,7 +586,6 @@ const MessagePage = () => {
                 ))}
               </div>
             )}
-
           </div>
           <button className='' title='Ask Gemo to write a message' >
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -654,7 +598,6 @@ const MessagePage = () => {
                 </radialGradient>
               </defs>
             </svg>
-
           </button>
 
           <button className='hover:bg-primary hover:text-white p-2 rounded-full text-primary'>
