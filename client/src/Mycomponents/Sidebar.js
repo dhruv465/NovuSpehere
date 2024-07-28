@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BsPeople, BsThreeDotsVertical } from "react-icons/bs";
 import { FiEdit } from "react-icons/fi";
 import { HiOutlineDotsCircleHorizontal } from 'react-icons/hi';
-import { IoImages, IoLanguage, IoSearch, IoVideocam } from "react-icons/io5";
+import { IoDocument, IoImages, IoLanguage, IoSearch, IoVideocam } from "react-icons/io5";
 import { TbLogout2 } from "react-icons/tb";
 import { useDispatch, useSelector } from 'react-redux';
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -375,7 +375,7 @@ const Sidebar = () => {
                                                         conv?.lastMsg?.documentUrl && (
                                                             <div className='flex items-center gap-2'>
                                                                 <span>
-                                                                    <IoImages />
+                                                                    <IoDocument />
                                                                 </span>
                                                                 {
                                                                     !conv?.lastMsg?.text && (

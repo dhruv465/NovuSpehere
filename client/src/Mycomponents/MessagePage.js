@@ -1,7 +1,7 @@
 import moment from 'moment';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { HiOutlineDotsVertical } from 'react-icons/hi';
-import { IoAddOutline, IoChevronBack, IoCloseOutline, IoDocumentText, IoEllipsisHorizontal, IoImages, IoLanguage, IoSend, IoVideocam } from 'react-icons/io5';
+import { IoAddOutline, IoChevronBack, IoCloseOutline, IoDocumentText, IoDownload, IoEllipsisHorizontal, IoImages, IoLanguage, IoSend, IoVideocam } from 'react-icons/io5';
 import { useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 import uploadFile from '../helpers/uploadFile';
@@ -9,7 +9,7 @@ import Avatar from './Avatar';
 import Loading from './Loader';
 import PromptContainer from './PromptContainer';
 import toast from 'react-hot-toast';
-import { BsEmojiGrin } from "react-icons/bs";
+import { IoDownloadOutline } from "react-icons/io5";
 
 
 const MessagePage = () => {
@@ -399,7 +399,7 @@ const MessagePage = () => {
         <div className='w-full max-w-screen-xl mx-auto p-4' ref={currentMessage}>
           {allMessage.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
-              <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <svg className="w-16 h-16 mb-4  animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
               <p className="text-xl font-semibold mb-2">No messages yet</p>
@@ -415,7 +415,7 @@ const MessagePage = () => {
                   <div className={`flex ${msg?.msgByUserId === user?._id ? 'flex-row-reverse' : 'flex-row'} w-full`}>
                     <div className={`message-bubble transition-shadow mt-2 ${user._id === msg.msgByUserId ? "ml-auto" : "mr-auto"}`}>
                       {msg.text && (
-                        <div className={`p-3 rounded-3xl break-words inline-block max-w-full ${user._id === msg.msgByUserId ? "bg-primary text-white" : "bg-tertiary"}`}>
+                        <div className={`p-3 rounded-3xl rounded-e-xl rounded-es-xl break-words inline-block max-w-full ${user._id === msg.msgByUserId ? "bg-primary text-white" : "bg-tertiary"}`}>
                           <p className='text-sm'>{msg.text}</p>
                         </div>
                       )}
@@ -424,7 +424,7 @@ const MessagePage = () => {
                           <img
                             src={msg.imageUrl}
                             alt='messageimage'
-                            className='w-full h-auto max-h-40 sm:max-h-60 md:max-h-80 object-contain rounded-lg cursor-pointer'
+                            className='w-full h-auto max-h-40 sm:max-h-60 md:max-h-80 object-contain shadow-lg rounded-lg cursor-pointer'
                             onClick={() => setModalImage(msg.imageUrl)}
                           />
                           <button
@@ -479,7 +479,21 @@ const MessagePage = () => {
                             {msg.thumbnailUrl ? (
                               <img src={msg.thumbnailUrl} alt="Document Preview" className="w-16 h-auto" />
                             ) : (
-                              <IoDocumentText size={40} />
+                              <svg fill="none" aria-hidden="true" class="w-12 h-12 drop-shadow-lg flex-shrink-0" viewBox="0 0 20 21">
+                                <g clip-path="url(#clip0_3173_1381)">
+                                  <path fill="#E2E5E7" d="M5.024.5c-.688 0-1.25.563-1.25 1.25v17.5c0 .688.562 1.25 1.25 1.25h12.5c.687 0 1.25-.563 1.25-1.25V5.5l-5-5h-8.75z" />
+                                  <path fill="#B0B7BD" d="M15.024 5.5h3.75l-5-5v3.75c0 .688.562 1.25 1.25 1.25z" />
+                                  <path fill="#CAD1D8" d="M18.774 9.25l-3.75-3.75h3.75v3.75z" />
+                                  <path fill="#F15642" d="M16.274 16.75a.627.627 0 01-.625.625H1.899a.627.627 0 01-.625-.625V10.5c0-.344.281-.625.625-.625h13.75c.344 0 .625.281.625.625v6.25z" />
+                                  <path fill="#fff" d="M3.998 12.342c0-.165.13-.345.34-.345h1.154c.65 0 1.235.435 1.235 1.269 0 .79-.585 1.23-1.235 1.23h-.834v.66c0 .22-.14.344-.32.344a.337.337 0 01-.34-.344v-2.814zm.66.284v1.245h.834c.335 0 .6-.295.6-.605 0-.35-.265-.64-.6-.64h-.834zM7.706 15.5c-.165 0-.345-.09-.345-.31v-2.838c0-.18.18-.31.345-.31H8.85c2.284 0 2.234 3.458.045 3.458h-1.19zm.315-2.848v2.239h.83c1.349 0 1.409-2.24 0-2.24h-.83zM11.894 13.486h1.274c.18 0 .36.18.36.355 0 .165-.18.3-.36.3h-1.274v1.049c0 .175-.124.31-.3.31-.22 0-.354-.135-.354-.31v-2.839c0-.18.135-.31.355-.31h1.754c.22 0 .35.13.35.31 0 .16-.13.34-.35.34h-1.455v.795z" />
+                                  <path fill="#CAD1D8" d="M15.649 17.375H3.774V18h11.875a.627.627 0 00.625-.625v-.625a.627.627 0 01-.625.625z" />
+                                </g>
+                                <defs>
+                                  <clipPath id="clip0_3173_1381">
+                                    <path fill="#fff" d="M0 0h20v20H0z" transform="translate(0 .5)" />
+                                  </clipPath>
+                                </defs>
+                              </svg>
                             )}
                           </div>
                           <div className='leading-tight p-2 text-black flex-grow overflow-hidden'>
@@ -487,7 +501,10 @@ const MessagePage = () => {
                               <span className='ml-2 text-sm'>{msg.documentName}</span>
                               <span className='ml-2 text-sm'>{msg.documentType}</span>
                             </a>
+
                           </div>
+                          <IoDownloadOutline  size={24} />
+
                         </div>
                       )}
                     </div>
