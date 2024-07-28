@@ -107,7 +107,7 @@ io.on('connection', async (socket) => {
 
         // Get receiver's preferred language(s)
         const receiverPreferences = await UserModel.findById(data.receiver).select('languages');
-        const receiverLanguages = receiverPreferences.languages || ['en']; // default to English if not set
+        const receiverLanguages = receiverPreferences.languages || ['']; // default to English if not set
 
         // Translate message text if necessary
         let translatedText = data.text;

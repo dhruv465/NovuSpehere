@@ -8,6 +8,8 @@ const updateUserDetails = require('../controller/updateUserDetails')
 const searchUser = require('../controller/SearchUser')
 const translateController = require('../controller/translateController');
 const userController = require('../controller/userController');
+const { generateMessage } = require('../controller/geminiController');
+
 
 
 const router = express.Router()
@@ -41,5 +43,8 @@ router.put('/user/preferences', userController.updateUserPreferences);
 
 // Get user language preferences
 router.get('/user/:userId', userController.getUserPreferences);
+
+router.post('/generate-message', generateMessage);
+
 
 module.exports = router

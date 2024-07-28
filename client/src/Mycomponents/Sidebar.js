@@ -35,6 +35,7 @@ const Sidebar = () => {
         fr: 'French',
         en: 'English',
         es: 'Spanish',
+        de: 'German',
         hi: 'Hindi',
         mr: 'Marathi',
         ar: 'Arabic',
@@ -255,7 +256,7 @@ const Sidebar = () => {
                                 <h2 className="text-2xl font-bold mb-6 text-gray-800">Choose receiver language</h2>
                                 <ul className="space-y-2">
                                     {Object.entries(languageMap)
-                                        .slice(0, 5) // Get the first 5 entries
+                                        .slice(0, 6) // Get the first 5 entries
                                         .map(([key, value]) => (
                                             <li
                                                 key={key}
@@ -275,8 +276,8 @@ const Sidebar = () => {
                                 <div className="mt-6 flex justify-between">
                                     <ButtonWithAnimation
                                         onClick={() => {
-                                            setShowApply(false); // Close the apply button
-                                            toggleLanguageModal(); // Close the modal
+                                            setShowApply(false);
+                                            toggleLanguageModal();
                                         }}
                                         className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-200"
                                     >

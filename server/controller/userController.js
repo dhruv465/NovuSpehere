@@ -21,6 +21,10 @@ exports.updateUserPreferences = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+
+
+
 // controllers/userController.js
 exports.getUserPreferences = async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1]; // Extract token from Authorization header

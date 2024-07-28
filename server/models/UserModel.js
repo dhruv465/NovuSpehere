@@ -21,7 +21,7 @@ const UserSchema = new mongoose.Schema({
     },
     languages: { 
         type: [String], 
-        default: []
+        default: null
     },
 }, {
     timestamps: true
