@@ -45,3 +45,23 @@ exports.getUserPreferences = async (req, res) => {
     }
 };
 
+
+// controllers/userController.js
+exports.resetUserPreferences = async (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1]; // Extract token from Authorization header
+    const user = await getUserDetailsFromToken(token);
+
+    if (user.logout) {
+        return res.status(401).json({ message: user.message });
+    }
+
+    try {
+        const updatedUser = await UserModel.findByIdAndUpdate(user._id, { languages: null }, { new: true });
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

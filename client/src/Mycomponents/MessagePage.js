@@ -1,15 +1,15 @@
 import moment from 'moment';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 import { HiOutlineDotsVertical } from 'react-icons/hi';
-import { IoAddOutline, IoChevronBack, IoCloseOutline, IoDocumentText, IoDownload, IoEllipsisHorizontal, IoImages, IoLanguage, IoSend, IoVideocam } from 'react-icons/io5';
+import { IoAddOutline, IoChevronBack, IoCloseOutline, IoDocumentText, IoDownloadOutline, IoEllipsisHorizontal, IoImages, IoLanguage, IoSend, IoVideocam } from 'react-icons/io5';
 import { useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 import uploadFile from '../helpers/uploadFile';
 import Avatar from './Avatar';
 import Loading from './Loader';
 import PromptContainer from './PromptContainer';
-import toast from 'react-hot-toast';
-import { IoDownloadOutline } from "react-icons/io5";
+import { MdOutlineKeyboardVoice } from "react-icons/md";
 
 
 const MessagePage = () => {
@@ -248,8 +248,20 @@ const MessagePage = () => {
     }
   }, [message, socketConnection, params.userId, user]);
 
+  const textareaRef = useRef(null);
+  const maxHeight = 200; // Set your specific maximum height here
 
-  const handleButtonClick = () => {
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`;
+    }
+  }, [message.text]);
+
+
+  const handleButtonClick = (e) => {
+    e.preventDefault();
     setIsEmailDraftVisible(!isEmailDraftVisible);
   };
 
@@ -299,7 +311,13 @@ const MessagePage = () => {
           </div>
 
         </div>
-
+        <div>
+          <button className='p-2 text-primary'>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+            </svg>
+          </button>
+        </div>
       </header>
 
 
@@ -414,11 +432,8 @@ const MessagePage = () => {
                 <div key={index} className={`flex flex-col py-2 w-full ${msg?.msgByUserId === user?._id ? 'items-end' : 'items-start'} gap-2`}>
                   <div className={`flex ${msg?.msgByUserId === user?._id ? 'flex-row-reverse' : 'flex-row'} w-full`}>
                     <div className={`message-bubble transition-shadow mt-2 ${user._id === msg.msgByUserId ? "ml-auto" : "mr-auto"}`}>
-                      {msg.text && (
-                        <div className={`p-3 rounded-3xl rounded-e-xl rounded-es-xl break-words inline-block max-w-full ${user._id === msg.msgByUserId ? "bg-primary text-white" : "bg-tertiary"}`}>
-                          <p className='text-sm'>{msg.text}</p>
-                        </div>
-                      )}
+
+
                       {msg.imageUrl && (
                         <div className="relative group w-full">
                           <img
@@ -503,8 +518,13 @@ const MessagePage = () => {
                             </a>
 
                           </div>
-                          <IoDownloadOutline  size={24} />
+                          <IoDownloadOutline size={24} />
 
+                        </div>
+                      )}
+                      {msg.text && (
+                        <div className={`p-3 rounded-3xl inline-block max-w-full ${user._id === msg.msgByUserId ? "bg-primary text-white rounded-br-none" : "bg-tertiary rounded-3xl rounded-bl-none"}`}>
+                          <p className='text-sm'>{user._id === msg.msgByUserId ? msg.text : msg.translatedText || msg.text}</p>
                         </div>
                       )}
                     </div>
@@ -583,9 +603,9 @@ const MessagePage = () => {
                   onChange={handleUploadDocument}
                   className='hidden'
                   accept='.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,
-           .xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
-           .ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,
-           .pdf,application/pdf,text/plain,application/vnd.ms-office'
+                          .xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+                          .ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,
+                          .pdf,application/pdf,text/plain,application/vnd.ms-office'
                 />
               </form>
             </div>
@@ -595,13 +615,16 @@ const MessagePage = () => {
         {/* input box for message */}
         <form className='w-full max-w-screen-xl flex gap-3 ' onSubmit={handleSendMessage}>
           <div className="relative flex-1">
-            <input
-              type='text'
+            <textarea
+              ref={textareaRef}
               value={message.text}
               onChange={handleOnChange}
-              onKeyDown={preventEnterKeyPress}
+              // onKeyDown={preventEnterKeyPress}
+              rows={1}
+              tabIndex={10}
               placeholder='Type a message...'
-              className='flex-1 p-2 pr-10 rounded-full border backdrop-filter backdrop-blur-lg focus:outline-none w-full'
+              className='flex-1 p-2 pr-12 rounded-3xl border backdrop-filter backdrop-blur-lg focus:outline-none w-full resize-none overflow-y-auto scrollbar-text'
+            // style={{ maxHeight: `${maxHeight}px` }}
             />
             <button
               type="button"
@@ -621,7 +644,23 @@ const MessagePage = () => {
                 >
                   <IoLanguage className="mr-2" /> Translate my Message
                 </button>
-
+                <button
+                  ref={buttonRef}
+                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm flex gap-1 items-center"
+                  onClick={handleButtonClick}
+                >
+                  <svg width="20" height="20" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14 28C14 26.0633 13.6267 24.2433 12.88 22.54C12.1567 20.8367 11.165 19.355 9.905 18.095C8.645 16.835 7.16333 15.8433 5.46 15.12C3.75667 14.3733 1.93667 14 0 14C1.93667 14 3.75667 13.6383 5.46 12.915C7.16333 12.1683 8.645 11.165 9.905 9.905C11.165 8.645 12.1567 7.16333 12.88 5.46C13.6267 3.75667 14 1.93667 14 0C14 1.93667 14.3617 3.75667 15.085 5.46C15.8317 7.16333 16.835 8.645 18.095 9.905C19.355 11.165 20.8367 12.1683 22.54 12.915C24.2433 13.6383 26.0633 14 28 14C26.0633 14 24.2433 14.3733 22.54 15.12C20.8367 15.8433 19.355 16.835 18.095 18.095C16.835 19.355 15.8317 20.8367 15.085 22.54C14.3617 24.2433 14 26.0633 14 28Z" fill="url(#paint0_radial_16771_53212)" />
+                    <defs>
+                      <radialGradient id="paint0_radial_16771_53212" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(2.77876 11.3795) rotate(18.6832) scale(29.8025 238.737)">
+                        <stop offset="0.0671246" stop-color="#9168C0" />
+                        <stop offset="0.342551" stop-color="#5684D1" />
+                        <stop offset="0.672076" stop-color="#1BA1E3" />
+                      </radialGradient>
+                    </defs>
+                  </svg>
+                  Ask Genmo
+                </button>
               </div>
             )}
             {showLanguages && (
@@ -638,32 +677,21 @@ const MessagePage = () => {
               </div>
             )}
           </div>
-          <button
-            ref={buttonRef}
-            className='relative'
-            onClick={handleButtonClick}
-          >
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M14 28C14 26.0633 13.6267 24.2433 12.88 22.54C12.1567 20.8367 11.165 19.355 9.905 18.095C8.645 16.835 7.16333 15.8433 5.46 15.12C3.75667 14.3733 1.93667 14 0 14C1.93667 14 3.75667 13.6383 5.46 12.915C7.16333 12.1683 8.645 11.165 9.905 9.905C11.165 8.645 12.1567 7.16333 12.88 5.46C13.6267 3.75667 14 1.93667 14 0C14 1.93667 14.3617 3.75667 15.085 5.46C15.8317 7.16333 16.835 8.645 18.095 9.905C19.355 11.165 20.8367 12.1683 22.54 12.915C24.2433 13.6383 26.0633 14 28 14C26.0633 14 24.2433 14.3733 22.54 15.12C20.8367 15.8433 19.355 16.835 18.095 18.095C16.835 19.355 15.8317 20.8367 15.085 22.54C14.3617 24.2433 14 26.0633 14 28Z" fill="url(#paint0_radial_16771_53212)" />
-              <defs>
-                <radialGradient id="paint0_radial_16771_53212" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(2.77876 11.3795) rotate(18.6832) scale(29.8025 238.737)">
-                  <stop offset="0.0671246" stop-color="#9168C0" />
-                  <stop offset="0.342551" stop-color="#5684D1" />
-                  <stop offset="0.672076" stop-color="#1BA1E3" />
-                </radialGradient>
-              </defs>
-            </svg>
-          </button>
+
           <PromptContainer
             isVisible={isEmailDraftVisible}
             onClose={() => setIsEmailDraftVisible(false)}
             buttonPosition={buttonPosition}
             onMessageGenerated={handlePromptMessageGenerated}
           />
-          <button className='hover:bg-primary hover:text-white p-2 rounded-full text-primary'>
-            <IoSend
-              size={25}
-            />
+          <button
+            className={`${message.text ? 'hover:bg-primary hover:text-white p-2 rounded-full text-primary' : 'text-gray-400 mb-1'}`}
+
+          >            {message.text ? (
+            <IoSend size={25} />
+          ) : (
+            <MdOutlineKeyboardVoice size={25} />
+          )}
           </button>
         </form>
       </section>

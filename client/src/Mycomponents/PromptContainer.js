@@ -101,7 +101,8 @@ const PromptContainer = ({ isVisible, onClose, onMessageGenerated }) => {
         }
     };
 
-    const handleClose = () => {
+    const handleClose = (e) => {
+        e.preventDefault();
         setMessage('');
         setGeneratedMessage('');
         setFollowUpMessage('');
@@ -143,7 +144,7 @@ const PromptContainer = ({ isVisible, onClose, onMessageGenerated }) => {
                         </div>
                     )}
                     {isGenerating ? (
-                        <div className="mt-4 text-center text-gray-700 animate-pulse">Gemo generating response...</div>
+                        <div className="mt-4 text-center text-gray-700 animate-pulse">Genmo generating response...</div>
                     ) : (
                         generatedMessage && (
                             <div className="mt-4">
@@ -159,7 +160,7 @@ const PromptContainer = ({ isVisible, onClose, onMessageGenerated }) => {
                                                 </radialGradient>
                                             </defs>
                                         </svg>
-                                        <p className="text-gray-700 flex-grow">{generatedMessage}</p>
+                                        <p className="text-gray-700 flex-grow bg-secondary p-4 rounded-md">{generatedMessage}</p>
                                     </div>
                                 </div>
                                 {containsQuestion(generatedMessage) && (

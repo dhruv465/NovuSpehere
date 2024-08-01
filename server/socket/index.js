@@ -126,7 +126,7 @@ io.on('connection', async (socket) => {
 
         // Update the message with translated text
         if (data.text) {
-            saveMessage.text = translatedText;
+            saveMessage.translatedText = translatedText;
             await saveMessage.save();
         }
 
@@ -137,8 +137,16 @@ io.on('connection', async (socket) => {
             ]
         }).populate('messages').sort({ updatedAt: -1 });
 
-        io.to(data.sender).emit('message', getConversationMessage.messages || []);
-        io.to(data.receiver).emit('message', getConversationMessage.messages || []);
+        io.to(data.sender).emit('message', getConversationMessage.messages.map(msg => ({
+            ...msg.toObject(),
+            text: msg.sender.toString() === data.sender ? msg.text : msg.translatedText || msg.text
+        })));
+
+        io.to(data.receiver).emit('message', getConversationMessage.messages.map(msg => ({
+            ...msg.toObject(),
+            text: msg.receiver.toString() === data.receiver ? msg.translatedText || msg.text : msg.text
+        })));
+
 
         const conversationSender = await getConversation(data.sender);
         const conversationReceiver = await getConversation(data.receiver);

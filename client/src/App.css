@@ -1,5 +1,6 @@
 .scrollbar::-webkit-scrollbar{
-  width: 10px;
+  width: 4px;
+ 
 }
 
 .scrollbar::-webkit-scrollbar-thumb{
@@ -9,4 +10,8 @@
 .scrollbar::-webkit-scrollbar-track{
  @apply bg-[#f1f1f1] 
   
+}
+
+.scrollbar-text::-webkit-scrollbar{
+  display: none;
 }

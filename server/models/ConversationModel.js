@@ -5,6 +5,8 @@ const messageSchema = new mongoose.Schema({
         type: String,
         default: ""
     },
+    translatedText: { type: String }, 
+
     imageUrl: {
         type: String,
         default: ""

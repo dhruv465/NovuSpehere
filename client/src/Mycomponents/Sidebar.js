@@ -1,3 +1,6 @@
+import { CheckIcon } from '@heroicons/react/24/solid'; // Ensure the correct path for v2
+import axios from 'axios';
+import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { BsPeople, BsThreeDotsVertical } from "react-icons/bs";
 import { FiEdit } from "react-icons/fi";
@@ -6,13 +9,12 @@ import { IoDocument, IoImages, IoLanguage, IoSearch, IoVideocam } from "react-ic
 import { TbLogout2 } from "react-icons/tb";
 import { useDispatch, useSelector } from 'react-redux';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { animated, useSpring, useTransition } from 'react-spring';
 import Avatar from '../Mycomponents/Avatar';
 import { logout } from '../redux/userSlice';
 import EditUserDetails from './EditUserDetails';
 import SearchUser from './SearchUser';
-import { animated, useSpring, useTransition } from 'react-spring';
-import { IoMdMore } from "react-icons/io";
-import { CheckIcon } from '@heroicons/react/24/solid'; // Ensure the correct path for v2
+import { IoIosArrowDown } from 'react-icons/io';
 
 
 const Sidebar = () => {
@@ -103,9 +105,6 @@ const Sidebar = () => {
             console.error('Error updating preferences:', error);
         }
     };
-
-
-
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -207,6 +206,25 @@ const Sidebar = () => {
             </animated.button>
         );
     };
+
+    const handleReset = () => {
+        resetUserPreferences();
+    };
+
+    const resetUserPreferences = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            };
+            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/reset-preferences`, {}, config);
+            console.log('Preferences reset successfully:', response.data);
+        } catch (error) {
+            console.error('Error resetting preferences:', error);
+        }
+    };
     return (
         <div className='w-full h-full backdrop-filter backdrop-blur-sm bg-white border-l-0 border-r  '>
 
@@ -273,7 +291,7 @@ const Sidebar = () => {
                                         ))}
                                 </ul>
 
-                                <div className="mt-6 flex justify-between">
+                                <div className="mt-6 flex gap-6">
                                     <ButtonWithAnimation
                                         onClick={() => {
                                             setShowApply(false);
@@ -282,6 +300,13 @@ const Sidebar = () => {
                                         className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-200"
                                     >
                                         Cancel
+                                    </ButtonWithAnimation>
+
+                                    <ButtonWithAnimation
+                                        className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-200"
+                                        onClick={handleReset}
+                                    >
+                                        Reset
                                     </ButtonWithAnimation>
 
                                     {applyTransition((styles, item) =>
@@ -327,6 +352,8 @@ const Sidebar = () => {
                         )
                     }
 
+
+
                     {
                         allUser.map((conv) => {
                             return (
@@ -335,75 +362,70 @@ const Sidebar = () => {
                                         <div>
                                             <Avatar width={40} height={40} imageUrl={conv?.userDetails?.profile_pic} name={conv?.userDetails?.name} />
                                         </div>
-                                        <div className='ml-4'>
-                                            <h2 className='text-lg font-semibold text-slate-800'>{conv?.userDetails?.name}</h2>
-                                            <div>
+                                        <div className='ml-4 flex-1'>
+                                            <div className='flex justify-between items-center'>
+                                                <h2 className='text-lg font-semibold text-slate-800'>
+                                                    {conv?.userDetails?.name}
+                                                </h2>
+                                                <span className='text-xs text-slate-500'>
+                                                    {moment(conv?.lastMsg?.createdAt).format('hh:mm A')}
+                                                </span>
+                                            </div>
+                                            <div className='flex justify-between items-center'>
                                                 <div className='text-slate-500 text-md '>
-                                                    {
-                                                        conv?.lastMsg?.imageUrl && (
-                                                            <div className='flex items-center gap-2'>
+                                                    {conv?.lastMsg?.imageUrl && (
+                                                        <div className='flex items-center gap-2'>
+                                                            <span>
+                                                                <IoImages />
+                                                            </span>
+                                                            {!conv?.lastMsg?.text && (
                                                                 <span>
-                                                                    <IoImages />
+                                                                    Image.
                                                                 </span>
-                                                                {
-                                                                    !conv?.lastMsg?.text && (
-                                                                        <span>
-                                                                            Image.
-                                                                        </span>
-                                                                    )
-                                                                }
-                                                            </div>
-                                                        )
-                                                    }
-                                                    {
-                                                        conv?.lastMsg?.videoUrl && (
-                                                            <div className='flex items-center gap-2'>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    {conv?.lastMsg?.videoUrl && (
+                                                        <div className='flex items-center gap-2'>
+                                                            <span>
+                                                                <IoVideocam />
+                                                            </span>
+                                                            {!conv?.lastMsg?.text && (
                                                                 <span>
-                                                                    <IoVideocam />
+                                                                    Video.
                                                                 </span>
-                                                                {
-                                                                    !conv?.lastMsg?.text && (
-                                                                        <span>
-                                                                            Video.
-                                                                        </span>
-                                                                    )
-                                                                }
-                                                            </div>
-                                                        )
-                                                    }
-                                                    {
-                                                        conv?.lastMsg?.documentUrl && (
-                                                            <div className='flex items-center gap-2'>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    {conv?.lastMsg?.documentUrl && (
+                                                        <div className='flex items-center gap-2'>
+                                                            <span>
+                                                                <IoDocument />
+                                                            </span>
+                                                            {!conv?.lastMsg?.text && (
                                                                 <span>
-                                                                    <IoDocument />
+                                                                    Document.
                                                                 </span>
-                                                                {
-                                                                    !conv?.lastMsg?.text && (
-                                                                        <span>
-                                                                            Document.
-                                                                        </span>
-                                                                    )
-                                                                }
-                                                            </div>
-                                                        )
-                                                    }
-
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    <p className='text-ellipsis line-clamp-1 gap-4'>{conv?.lastMsg?.text}</p>
                                                 </div>
-                                                <p className='text-ellipsis line-clamp-1 gap-4'>{conv?.lastMsg?.text}</p>
+                                                <IoIosArrowDown className='text-slate-500 text-xl mr-3' />
                                             </div>
                                         </div>
-                                        {
-                                            Boolean(conv?.unseenMsg) && (
-                                                <p className='text-xs w-6 h-6 flex justify-center items-center ml-auto p-1 bg-primary text-white font-semibold rounded-full'>
-                                                    {conv?.unseenMsg}
-                                                </p>
-                                            )
-                                        }
+                                        {Boolean(conv?.unseenMsg) && (
+                                            <p className='text-xs w-6 h-6 flex justify-center items-center ml-auto p-1 bg-primary text-white font-semibold rounded-full'>
+                                                {conv?.unseenMsg}
+                                            </p>
+                                        )}
                                     </div>
                                 </NavLink>
                             )
                         })
                     }
+
+
                 </div>
             </div>
 

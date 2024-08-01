@@ -46,5 +46,7 @@ router.get('/user/:userId', userController.getUserPreferences);
 
 router.post('/generate-message', generateMessage);
 
+// Route to reset user preferences
+router.post('/reset-preferences', userController.resetUserPreferences);
 
 module.exports = router
