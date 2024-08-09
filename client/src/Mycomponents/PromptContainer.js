@@ -25,13 +25,20 @@ const PromptContainer = ({ isVisible, onClose, onMessageGenerated }) => {
         setFollowUpMessage(event.target.value);
     };
 
-    const handleSend = async () => {
+    const handleSend = async (e) => {
+        e.preventDefault();
         if (generatedMessage) {
             await handleFollowUpSubmit();
         } else {
             await generateMessage();
         }
     };
+    
+    const handleRegenerate = async (e) => {
+        e.preventDefault();
+        await generateMessage();
+    };
+    
 
     const generateMessage = async () => {
         setIsGenerating(true);
@@ -43,11 +50,11 @@ const PromptContainer = ({ isVisible, onClose, onMessageGenerated }) => {
                 },
                 body: JSON.stringify({ prompt: message })
             });
-
+    
             if (!response.ok) {
                 throw new Error('Error generating message');
             }
-
+    
             const data = await response.json();
             if (data.message) {
                 setGeneratedMessage(data.message);
@@ -60,18 +67,17 @@ const PromptContainer = ({ isVisible, onClose, onMessageGenerated }) => {
             setIsGenerating(false);
         }
     };
+    
 
-    const handleApply = () => {
+    const handleApply = (e) => {
+        e.preventDefault();
         onMessageGenerated(generatedMessage);
         setGeneratedMessage('');
         setMessage('');
         onClose();
     };
 
-    const handleRegenerate = async () => {
-        await generateMessage();
-    };
-
+   
     const handleFollowUpSubmit = async () => {
         setIsGenerating(true);
         try {
@@ -82,11 +88,11 @@ const PromptContainer = ({ isVisible, onClose, onMessageGenerated }) => {
                 },
                 body: JSON.stringify({ prompt: `${generatedMessage} ${followUpMessage}` })
             });
-
+    
             if (!response.ok) {
                 throw new Error('Error generating follow-up message');
             }
-
+    
             const data = await response.json();
             if (data.message) {
                 setGeneratedMessage(data.message);
@@ -100,7 +106,7 @@ const PromptContainer = ({ isVisible, onClose, onMessageGenerated }) => {
             setIsGenerating(false);
         }
     };
-
+    
     const handleClose = (e) => {
         e.preventDefault();
         setMessage('');

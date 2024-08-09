@@ -13,25 +13,28 @@ async function updateUserDetails(request, response) {
             });
         }
 
-        console.log('User ID:', user._id);
+        const { name, profile_pic } = JSON.parse(request.body); // Parse the incoming JSON body
 
-        const { name, profile_pic } = request.body;
-        console.log('Received data:', { name, profile_pic });
-
-        if (!name || !profile_pic) {
+        if (!name) {
             return response.status(400).json({
-                message: "Name and profile picture are required",
+                message: "Name is required",
                 error: true
             });
         }
 
-        await UserModel.updateOne(
+        const result = await UserModel.updateOne(
             { _id: user._id },
             { name, profile_pic }
         );
 
+        if (result.nModified === 0) {
+            return response.status(400).json({
+                message: "No changes were made",
+                error: true
+            });
+        }
+
         const userInformation = await UserModel.findById(user._id);
-        console.log('Updated user info:', userInformation);
 
         return response.json({
             message: "User Updated Successfully",
@@ -48,3 +51,4 @@ async function updateUserDetails(request, response) {
 }
 
 module.exports = updateUserDetails;
+

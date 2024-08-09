@@ -7,7 +7,6 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../redux/userSlice';
-import { stringify } from 'flatted';
 import { animated, useSpring, useTransition } from 'react-spring';
 
 const EditUserDetails = ({ onClose, user }) => {
@@ -17,7 +16,7 @@ const EditUserDetails = ({ onClose, user }) => {
     });
 
     const [isModalVisible, setModalVisible] = useState(true);
-    const [isModalExiting, setModalExiting] = useState(false);
+    const [isExiting, setExiting] = useState(false);
 
     const uploadPhotoRef = useRef();
     const dispatch = useDispatch();
@@ -62,15 +61,7 @@ const EditUserDetails = ({ onClose, user }) => {
         e.stopPropagation();
         try {
             const URL = `${process.env.REACT_APP_BACKEND_URL}/api/update-user`;
-
-            // Log data to inspect its structure
-            console.log('Data being sent:', data);
-
-            // Use flatted.stringify if necessary
-            const serializedData = stringify(data);
-
-            // Post the data with Axios
-            const response = await axios.post(URL, serializedData, {
+            const response = await axios.post(URL, data, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json',
@@ -91,14 +82,14 @@ const EditUserDetails = ({ onClose, user }) => {
     };
 
     const handleClose = () => {
-        setModalExiting(true);
+        setExiting(true);
         setTimeout(() => {
             setModalVisible(false);
             onClose();
         }, 300); // duration of the exit transition
     };
 
-    const modalTransition = useTransition(isModalVisible, {
+    const modalTransition = useTransition(isModalVisible || isExiting, {
         from: { opacity: 0, transform: 'scale(0.9)' },
         enter: { opacity: 1, transform: 'scale(1)' },
         leave: { opacity: 0, transform: 'scale(0.9)' },
@@ -126,8 +117,8 @@ const EditUserDetails = ({ onClose, user }) => {
 
     return modalTransition((styles, item) =>
         item && (
-            <animated.div style={styles} className='fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50 flex justify-center items-center'>
-                <div className='w-full max-w-sm bg-white rounded-lg p-5'>
+            <animated.div style={styles} className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <animated.div style={{ opacity: styles.opacity, transform: styles.transform }} className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4 sm:mx-0">
                     <div className='flex justify-between items-center'>
                         <h1 className='text-xl font-bold'>Edit User Details</h1>
                         <button onClick={handleClose}><IoCloseOutline size={25} /></button>
@@ -171,7 +162,7 @@ const EditUserDetails = ({ onClose, user }) => {
                         <div className='flex justify-end mt-4'>
                             <ButtonWithAnimation
                                 onClick={handleClose}
-                                className='bg-danger text-white px-4 py-2 rounded-md mr-2'
+                                className='bg-gray-200 text-gray-700 px-4 py-2 rounded-md mr-2'
                             >
                                 Cancel
                             </ButtonWithAnimation>
@@ -183,7 +174,7 @@ const EditUserDetails = ({ onClose, user }) => {
                             </ButtonWithAnimation>
                         </div>
                     </form>
-                </div>
+                </animated.div>
             </animated.div>
         )
     );

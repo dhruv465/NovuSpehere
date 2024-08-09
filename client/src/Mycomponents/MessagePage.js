@@ -2,14 +2,13 @@ import moment from 'moment';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { HiOutlineDotsVertical } from 'react-icons/hi';
-import { IoAddOutline, IoChevronBack, IoCloseOutline, IoDocumentText, IoDownloadOutline, IoEllipsisHorizontal, IoImages, IoLanguage, IoSend, IoVideocam } from 'react-icons/io5';
+import { IoAddOutline, IoChevronBack, IoCloseOutline, IoDocumentText, IoDownloadOutline, IoEllipsisHorizontal, IoImages, IoLanguage, IoMicOutline, IoSend, IoVideocam } from 'react-icons/io5';
 import { useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 import uploadFile from '../helpers/uploadFile';
 import Avatar from './Avatar';
 import Loading from './Loader';
 import PromptContainer from './PromptContainer';
-import { MdOutlineKeyboardVoice } from "react-icons/md";
 
 
 const MessagePage = () => {
@@ -159,21 +158,6 @@ const MessagePage = () => {
     })
   }
 
-  const handleUploadDocument = async (e) => {
-    const file = e.target.files[0];
-    setLoading(true);
-    const uploadPhoto = await uploadFile(file);
-    setLoading(false);
-    setOpenImageVideoUpload(false);
-
-    setMessage(preve => {
-      return {
-        ...preve,
-        documentUrl: uploadPhoto.url,
-        documentName: file.name
-      }
-    });
-  }
 
   const handleClearUploadDocument = () => {
     setMessage(preve => {
@@ -187,7 +171,7 @@ const MessagePage = () => {
 
 
   useEffect(() => {
-    if (socketConnection) {
+    if (socketConnection && params.userId) {
       socketConnection.emit('message-page', params.userId);
       socketConnection.emit('seen', params.userId);
 
@@ -207,7 +191,11 @@ const MessagePage = () => {
           )
         );
       });
-    }
+    } return () => {
+      if (socketConnection) {
+        socketConnection.off('seen');
+      }
+    };
   }, [socketConnection, params?.userId, user]);
 
   const handleOnChange = (e) => {
@@ -272,11 +260,6 @@ const MessagePage = () => {
     }
   }, []);
 
-  const preventEnterKeyPress = (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-    }
-  };
 
   const handlePromptMessageGenerated = (generatedMessage) => {
     setMessage((prev) => ({
@@ -591,7 +574,7 @@ const MessagePage = () => {
                   className='hidden'
                   accept="video/*"
                 />
-                <label htmlFor='uploadDocument' className='flex items-center gap-3 p-2 hover:bg-secondary rounded-md cursor-pointer'>
+                {/* <label htmlFor='uploadDocument' className='flex items-center gap-3 p-2 hover:bg-secondary rounded-md cursor-pointer ' >
                   <div className='text-blue-600'>
                     <IoDocumentText size={18} />
                   </div>
@@ -606,7 +589,7 @@ const MessagePage = () => {
                           .xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
                           .ppt,.pptx,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,
                           .pdf,application/pdf,text/plain,application/vnd.ms-office'
-                />
+                /> */}
               </form>
             </div>
           )
@@ -615,24 +598,31 @@ const MessagePage = () => {
         {/* input box for message */}
         <form className='w-full max-w-screen-xl flex gap-3 ' onSubmit={handleSendMessage}>
           <div className="relative flex-1">
-            <textarea
+            <input
               ref={textareaRef}
               value={message.text}
               onChange={handleOnChange}
               // onKeyDown={preventEnterKeyPress}
-              rows={1}
-              tabIndex={10}
+              // rows={1}
+              // tabIndex={10}
               placeholder='Type a message...'
-              className='flex-1 p-2 pr-12 rounded-3xl border backdrop-filter backdrop-blur-lg focus:outline-none w-full resize-none overflow-y-auto scrollbar-text'
+              className='flex-1 p-5 lg:p-2 pr-12 rounded-3xl border backdrop-filter backdrop-blur-lg focus:outline-none w-full resize-none overflow-y-auto scrollbar-text'
             // style={{ maxHeight: `${maxHeight}px` }}
             />
+            <button
+              type="button"
+
+              className="absolute right-10 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 z-50"
+            >
+              <IoMicOutline size={24} />
+            </button>
             <button
               type="button"
               onClick={() => {
                 setShowMenu(!showMenu);
                 setShowLanguages(false);
               }}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 z-10"
             >
               <IoEllipsisHorizontal size={20} />
             </button>
@@ -685,13 +675,10 @@ const MessagePage = () => {
             onMessageGenerated={handlePromptMessageGenerated}
           />
           <button
-            className={`${message.text ? 'hover:bg-primary hover:text-white p-2 rounded-full text-primary' : 'text-gray-400 mb-1'}`}
-
-          >            {message.text ? (
+            className='hover:bg-primary hover:text-white p-2 rounded-full text-primary'
+          >
             <IoSend size={25} />
-          ) : (
-            <MdOutlineKeyboardVoice size={25} />
-          )}
+
           </button>
         </form>
       </section>

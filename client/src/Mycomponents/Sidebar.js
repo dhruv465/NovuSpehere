@@ -14,7 +14,6 @@ import Avatar from '../Mycomponents/Avatar';
 import { logout } from '../redux/userSlice';
 import EditUserDetails from './EditUserDetails';
 import SearchUser from './SearchUser';
-import { IoIosArrowDown } from 'react-icons/io';
 
 
 const Sidebar = () => {
@@ -209,6 +208,8 @@ const Sidebar = () => {
 
     const handleReset = () => {
         resetUserPreferences();
+        toggleLanguageModal(); // Close the modal
+
     };
 
     const resetUserPreferences = async () => {
@@ -232,7 +233,8 @@ const Sidebar = () => {
             <div className='w-full col-start-2'>
                 <div className='h-16 flex items-center justify-between pr-4 bg-transparent'>
                     <div className='flex justify-center items-center'>
-                        <span className='ml-4'>                    <Avatar width={40} height={40} name={user?.name} imageUrl={user.profile_pic} userId={user?._id} />
+                        <span className='ml-4'>
+                            <Avatar width={40} height={40} name={user?.name} imageUrl={user.profile_pic} userId={user?._id} />
                         </span>
 
                         <h2 className='text-2xl font-bold pl-4 text-black font-noto-sans'>
@@ -374,7 +376,7 @@ const Sidebar = () => {
                                             <div className='flex justify-between items-center'>
                                                 <div className='text-slate-500 text-md '>
                                                     {conv?.lastMsg?.imageUrl && (
-                                                        <div className='flex items-center gap-2'>
+                                                        <div className='flex items-center gap-1'>
                                                             <span>
                                                                 <IoImages />
                                                             </span>
@@ -386,7 +388,7 @@ const Sidebar = () => {
                                                         </div>
                                                     )}
                                                     {conv?.lastMsg?.videoUrl && (
-                                                        <div className='flex items-center gap-2'>
+                                                        <div className='flex items-center gap-1'>
                                                             <span>
                                                                 <IoVideocam />
                                                             </span>
@@ -398,7 +400,7 @@ const Sidebar = () => {
                                                         </div>
                                                     )}
                                                     {conv?.lastMsg?.documentUrl && (
-                                                        <div className='flex items-center gap-2'>
+                                                        <div className='flex items-center gap-1'>
                                                             <span>
                                                                 <IoDocument />
                                                             </span>
@@ -411,11 +413,11 @@ const Sidebar = () => {
                                                     )}
                                                     <p className='text-ellipsis line-clamp-1 gap-4'>{conv?.lastMsg?.text}</p>
                                                 </div>
-                                                <IoIosArrowDown className='text-slate-500 text-xl mr-3' />
+                                                {/* <IoIosArrowDown className='text-slate-500 text-xl mr-3' /> */}
                                             </div>
                                         </div>
                                         {Boolean(conv?.unseenMsg) && (
-                                            <p className='text-xs w-6 h-6 flex justify-center items-center ml-auto p-1 bg-primary text-white font-semibold rounded-full'>
+                                            <p className='text-xs w-6 h-6 flex justify-center items-center ml-auto p-1 mt-4 bg-primary text-white font-semibold rounded-full'>
                                                 {conv?.unseenMsg}
                                             </p>
                                         )}
@@ -460,7 +462,10 @@ const Sidebar = () => {
                             </span>
                         </button>
                         <button
-                            onClick={toggleLanguageModal}
+                            onClick={() => {
+                                toggleModal(); // Close the main menu modal
+                                toggleLanguageModal(); // Open the language modal
+                            }}
                             className='w-full flex items-center gap-2 p-2 hover:bg-secondary rounded-md'
                         >
                             <span>

@@ -27,7 +27,9 @@ const Avatar = ({ userId, name, imageUrl, width, height }) => {
         'bg-gray-200',
         "bg-cyan-200",
         "bg-sky-200",
-        "bg-blue-200"
+        "bg-blue-200",
+        "bg-indigo-200",
+        
     ]
 
     const randomNumber = Math.floor(Math.random() * 9)
@@ -35,16 +37,14 @@ const Avatar = ({ userId, name, imageUrl, width, height }) => {
     const isOnline = onlineUser.includes(userId)
 
     return (
-        <div className={'text-slate-800 overflow-hidden rounded-full shadow border text-xl font-bold relative'} style={{ width: width + "px", height: height + "px" }} >
+        <div className='text-slate-800 overflow-hidden rounded-full shadow border text-xl font-bold relative' style={{ width: width + "px", height: height + "px" }} >
 
             {
                 imageUrl ? (
                     <img
                         src={imageUrl}
-                        width={width}
-                        height={height}
                         alt={name}
-                        className='overflow-hidden rounded-full'
+                        className='absolute inset-0 w-full h-full object-cover rounded-full'
                     />
                 ) : (
                     name ? (
@@ -61,11 +61,9 @@ const Avatar = ({ userId, name, imageUrl, width, height }) => {
 
             {
                 isOnline && (
-                    <div className='bg-green-600 p-1 absolute top-2 -right-1 rounded-full'> </div>
+                    <div className='bg-green-600 p-1 absolute top-2 -right-1 rounded-full'></div>
                 )
             }
-
-
 
         </div>
     )

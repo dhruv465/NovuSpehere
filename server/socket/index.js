@@ -7,6 +7,10 @@ const { ConversationModel, MessageModel } = require('../models/ConversationModel
 const getConversation = require('../helpers/getConversation')
 const { Translate } = require('@google-cloud/translate').v2;
 const app = express()
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_CLOUD_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
 
 /***socket connection */
 const server = http.createServer(app)
@@ -64,12 +68,6 @@ io.on('connection', async (socket) => {
 
 
 
-
-    const { Translate } = require('@google-cloud/translate').v2;
-
-    // Initialize the Google Cloud Translation client
-    const translate = new Translate({ key: process.env.GOOGLE_CLOUD_API_KEY });
-
     socket.on('new message', async (data) => {
         let conversation = await ConversationModel.findOne({
             "$or": [
@@ -115,9 +113,10 @@ io.on('connection', async (socket) => {
             try {
                 // Assuming we want to translate to the first language in the receiver's list
                 const targetLanguage = receiverLanguages[0];
-                if (targetLanguage !== 'en') {
-                    const [translation] = await translate.translate(data.text, targetLanguage);
-                    translatedText = translation;
+                if (targetLanguage !== '') {
+                    const prompt = `Translate the following text to ${targetLanguage}: ${data.text}`;
+                    const result = await model.generateContent(prompt);
+                    translatedText = result.response.text();
                 }
             } catch (error) {
                 console.error('Translation error:', error);
@@ -147,13 +146,13 @@ io.on('connection', async (socket) => {
             text: msg.receiver.toString() === data.receiver ? msg.translatedText || msg.text : msg.text
         })));
 
-
         const conversationSender = await getConversation(data.sender);
         const conversationReceiver = await getConversation(data.receiver);
 
         io.to(data.sender).emit('conversation', conversationSender);
         io.to(data.receiver).emit('conversation', conversationReceiver);
     });
+
 
 
 
