@@ -269,7 +269,7 @@ const MessagePage = () => {
     toast.success('Message generated successfully!');
   };
   return (
-    <div className=''>
+    <div>
       <header className='sticky top-0 h-16 bg-header border-b backdrop-filter backdrop-blur-lg shadow-lg flex justify-between items-center px-4'>
         <div className='flex items-center gap-2'>
           <Link to={"/"} className='rounded-full lg:hidden'>
@@ -529,7 +529,7 @@ const MessagePage = () => {
         </div>
       </section>
 
-      <section className='fixed bottom-0 w-full p-2.5 border-t  flex items-center gap-2 z-50'>
+      <section className='fixed bottom-0 w-full p-2.5 border-t flex items-center gap-2 z-50'>
         <div className='flex justify-center items-center'>
           <button className='p-2'>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -596,26 +596,17 @@ const MessagePage = () => {
         }
 
         {/* input box for message */}
-        <form className='w-full max-w-screen-xl flex gap-3 ' onSubmit={handleSendMessage}>
+        <form className='lg:w-1/3 max-w-screen-xl flex gap-3 ' onSubmit={handleSendMessage}>
           <div className="relative flex-1">
             <input
               ref={textareaRef}
               value={message.text}
               onChange={handleOnChange}
-              // onKeyDown={preventEnterKeyPress}
-              // rows={1}
-              // tabIndex={10}
               placeholder='Type a message...'
               className='flex-1 p-5 lg:p-2 pr-12 rounded-3xl border backdrop-filter backdrop-blur-lg focus:outline-none w-full resize-none overflow-y-auto scrollbar-text'
-            // style={{ maxHeight: `${maxHeight}px` }}
             />
-            <button
-              type="button"
 
-              className="absolute right-10 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 z-50"
-            >
-              <IoMicOutline size={24} />
-            </button>
+
             <button
               type="button"
               onClick={() => {
@@ -629,14 +620,14 @@ const MessagePage = () => {
             {showMenu && (
               <div className="absolute right-0 bottom-full mb-2 bg-white shadow-lg rounded-md py-2 z-10">
                 <button
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm flex items-center"
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm flex items-center"
                   onClick={handleTranslateClick}
                 >
                   <IoLanguage className="mr-2" /> Translate my Message
                 </button>
                 <button
                   ref={buttonRef}
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm flex gap-1 items-center"
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm flex gap-1 items-center"
                   onClick={handleButtonClick}
                 >
                   <svg width="20" height="20" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -674,6 +665,7 @@ const MessagePage = () => {
             buttonPosition={buttonPosition}
             onMessageGenerated={handlePromptMessageGenerated}
           />
+
           <button
             className='hover:bg-primary hover:text-white p-2 rounded-full text-primary'
           >
@@ -681,7 +673,9 @@ const MessagePage = () => {
 
           </button>
         </form>
+
       </section>
+
       {modalImage && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" onClick={() => setModalImage(null)}>
           <div className="relative w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-4xl h-[60vh] sm:h-[70vh] md:h-[80vh] rounded-lg overflow-hidden" onClick={(e) => e.stopPropagation()}>

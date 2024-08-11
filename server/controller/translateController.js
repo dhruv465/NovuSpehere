@@ -8,7 +8,7 @@ const translateText = async (req, res) => {
   const { text, targetLang } = req.body;
 
   // Formulate a translation prompt for the model
-  const prompt = `Translate "${text}" to ${targetLang}.`;
+  const prompt = `translate "${text}" to ${targetLang}.`;
 
   try {
     const result = await model.generateContent(prompt);

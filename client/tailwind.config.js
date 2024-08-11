@@ -22,7 +22,6 @@ module.exports = {
         lg: '12px',
         xl: '16px',
       }
-      
     },
   },
   plugins: [],
