@@ -17,7 +17,7 @@ Welcome to the Chat App, a powerful React.js application that enables seamless c
 
 1. **Navigate to the Frontend Directory**:
    ```bash
-   cd frontend
+   cd client
    ```
 
 2. **Install Frontend Dependencies**:
