@@ -42,7 +42,7 @@ Welcome to the Chat App, a powerful React.js application that enables seamless c
 
 1. **Navigate to the Backend Directory**:
    ```bash
-   cd backend
+   cd server
    ```
 
 2. **Install Backend Dependencies**:
